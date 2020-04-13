@@ -1,0 +1,88 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.fahkap.eoo.quiz",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "6.8.0",
+    "applicationType": "microservice",
+    "baseName": "eooquiz",
+    "packageName": "com.fahkap.eoo.quiz",
+    "packageFolder": "com/fahkap/eoo/quiz",
+    "serverPort": "9878",
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "enableHibernateCache": false,
+    "websocket": false,
+    "databaseType": "mongodb",
+    "devDatabaseType": "mongodb",
+    "prodDatabaseType": "mongodb",
+    "searchEngine": false,
+    "messageBroker": "kafka",
+    "serviceDiscoveryType": "eureka",
+    "buildTool": "gradle",
+    "enableSwaggerCodegen": true,
+    "jwtSecretKey": "Nzc5Zjk0NGQwMzViNjI0YTg1ZWViM2RiNjViZWUwZDdmN2Q0ZmY2MjMyODczMzJmZmEzMTE5NzY0ODhmMzBmMWRmZmVjNWY2NzhjZGVkNDQyMzI2MWU2NWFkYTE2MmYwMThkMTgyNGM1OWVjNDU1ODg0YzIyYTI2ZWM4MDc1MTY=",
+    "embeddableLaunchScript": false,
+    "creationTimestamp": 1586784114099,
+    "testFrameworks": ["gatling", "cucumber"],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [
+      {
+        "name": "generator-jhipster-docker",
+        "version": "2.5.0"
+      },
+      {
+        "name": "generator-jhipster-primeng",
+        "version": "3.0.0"
+      },
+      {
+        "name": "generator-jhipster-primeng-charts",
+        "version": "1.2.0"
+      },
+      {
+        "name": "generator-jhipster-testcontainers",
+        "version": "1.1.0"
+      },
+      {
+        "name": "generator-jhipster-uaa-security-authority",
+        "version": "1.0.1"
+      },
+      {
+        "name": "generator-jhipster-angular-material-integration",
+        "version": "1.0.17"
+      },
+      {
+        "name": "generator-jhipster-jgitver",
+        "version": "0.1.0"
+      },
+      {
+        "name": "generator-jhipster-kotlin",
+        "version": "1.6.0"
+      },
+      {
+        "name": "generator-jhipster-primeng-blueprint",
+        "version": "0.0.19"
+      }
+    ],
+    "enableTranslation": true,
+    "clientPackageManager": "npm",
+    "nativeLanguage": "en",
+    "languages": ["en", "nl", "fr", "de"],
+    "blueprints": [
+      {
+        "name": "generator-jhipster-kotlin",
+        "version": "1.6.0"
+      },
+      {
+        "name": "generator-jhipster-primeng-blueprint",
+        "version": "0.0.19"
+      }
+    ],
+    "reactive": true,
+    "skipClient": true,
+    "skipUserManagement": true
+  }
+}
