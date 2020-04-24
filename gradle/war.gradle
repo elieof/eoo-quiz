@@ -1,7 +1,7 @@
 apply plugin: "war"
 
 bootWar {
-    mainClassName = "com.fahkap.eoo.quiz.EooquizApp"
+    mainClassName = "com.fahkap.eoo.quiz.EooQuizApp"
     includes = ["WEB-INF/**", "META-INF/**"]
 }
 

@@ -1,0 +1,64 @@
+
+entity Topic {
+  name String required
+}
+
+entity Proposition {
+  statement String required,
+  valid Boolean required,
+  explanation String
+}
+
+entity Question{
+	statement String required,
+    level Integer required
+}
+
+entity Quiz{
+	name String,
+	description String
+}
+
+entity QResult{
+	valid Boolean required
+}
+
+relationship ManyToOne {
+  Question{topic} to Topic
+}
+
+relationship OneToMany {
+  Question{proposition} to Proposition
+}
+
+/*
+relationship ManyToOne {
+  Proposition{question} to Question
+}
+*/
+
+relationship OneToMany {
+  Quiz{question} to Question
+}
+
+relationship ManyToOne {
+  QResult{quiz} to Quiz
+}
+
+relationship ManyToOne {
+  QResult{user} to User
+}
+
+relationship ManyToOne {
+  QResult{question} to Question
+}
+
+relationship ManyToOne {
+  QResult{proposition} to Proposition
+}
+
+paginate all with pagination
+
+dto * with mapstruct
+
+service all with serviceImpl

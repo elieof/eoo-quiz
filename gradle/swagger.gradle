@@ -2,18 +2,18 @@
  * Plugin that provides API-first development using OpenAPI-generator to
  * generate Spring-MVC endpoint stubs at compile time from an OpenAPI definition file
  */
-apply plugin: "org.openapi.generator"
+//apply plugin: "org.openapi.generator"
 
 openApiGenerate {
-    generatorName = "spring"
+    generatorName = "kotlin"
     inputSpec = "$rootDir/src/main/resources/swagger/api.yml".toString()
     outputDir = "$buildDir/openapi".toString()
     apiPackage = "com.fahkap.eoo.quiz.web.api"
     modelPackage = "com.fahkap.eoo.quiz.web.api.model"
     apiFilesConstrainedTo = [""]
     modelFilesConstrainedTo = [""]
-    supportingFilesConstrainedTo = ["ApiUtil.java"]
-    configOptions = [delegatePattern: "true", title: "eooquiz"]
+    supportingFilesConstrainedTo = ["ApiUtil.kt"]
+    configOptions = [delegatePattern: "true", title: "eoo-quiz"]
     validateSpec = true
     importMappings = [Problem:"org.zalando.problem.Problem"]
 }

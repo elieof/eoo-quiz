@@ -106,7 +106,7 @@ management:
 
 spring:
   application:
-    name: eooquiz
+    name: eooQuiz
   jmx:
     enabled: false
   messages:
@@ -115,13 +115,13 @@ spring:
     allow-bean-definition-overriding: true
   task:
     execution:
-      thread-name-prefix: eooquiz-task-
+      thread-name-prefix: eoo-quiz-task-
       pool:
         core-size: 2
         max-size: 50
         queue-capacity: 10000
     scheduling:
-      thread-name-prefix: eooquiz-scheduling-
+      thread-name-prefix: eoo-quiz-scheduling-
       pool:
         size: 2
   thymeleaf:
@@ -149,7 +149,7 @@ info:
 
 jhipster:
   clientApp:
-    name: 'eooquizApp'
+    name: 'eooQuizApp'
   # By default CORS is disabled. Uncomment to enable.
   # cors:
   #     allowed-origins: "*"
@@ -159,11 +159,11 @@ jhipster:
   #     allow-credentials: true
   #     max-age: 1800
   mail:
-    from: eooquiz@localhost
+    from: eooQuiz@localhost
   swagger:
     default-include-pattern: /api/.*
-    title: eooquiz API
-    description: eooquiz API documentation
+    title: eooQuiz API
+    description: eooQuiz API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:
@@ -176,7 +176,7 @@ kafka:
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: eooquiz
+    group.id: eoo-quiz
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer

@@ -17,12 +17,12 @@ eureka:
   client:
     enabled: false
   instance:
-    appname: eooquiz
-    instanceId: eooquiz:${spring.application.instance-id:${random.value}}
+    appname: eooQuiz
+    instanceId: eooQuiz:${spring.application.instance-id:${random.value}}
 
 spring:
   application:
-    name: eooquiz
+    name: eooQuiz
   jackson:
     serialization:
       write-durations-as-timestamps: false
@@ -30,7 +30,7 @@ spring:
     mongodb:
       host: localhost
       port: 0
-      database: eooquiz
+      database: eooQuiz
   mail:
     host: localhost
   main:
@@ -42,13 +42,13 @@ spring:
       enabled: false
   task:
     execution:
-      thread-name-prefix: eooquiz-task-
+      thread-name-prefix: eoo-quiz-task-
       pool:
         core-size: 1
         max-size: 50
         queue-capacity: 10000
     scheduling:
-      thread-name-prefix: eooquiz-scheduling-
+      thread-name-prefix: eoo-quiz-scheduling-
       pool:
         size: 1
   thymeleaf:
@@ -66,7 +66,7 @@ server:
 
 jhipster:
   clientApp:
-    name: 'eooquizApp'
+    name: 'eooQuizApp'
   logging:
     # To test json console appender
     use-json-format: true # By default, logs are in Json format
@@ -91,7 +91,7 @@ kafka:
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: eooquiz
+    group.id: eoo-quiz
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer

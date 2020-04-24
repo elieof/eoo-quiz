@@ -1,6 +1,6 @@
 package com.fahkap.eoo.quiz.cucumber
 
-import com.fahkap.eoo.quiz.EooquizApp
+import com.fahkap.eoo.quiz.EooQuizApp
 import io.cucumber.java.Before
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
@@ -8,7 +8,7 @@ import org.springframework.test.context.web.WebAppConfiguration
 
 @SpringBootTest
 @WebAppConfiguration
-@ContextConfiguration(classes = [EooquizApp::class])
+@ContextConfiguration(classes = [EooQuizApp::class])
 class CucumberContextConfiguration {
 
     @Before

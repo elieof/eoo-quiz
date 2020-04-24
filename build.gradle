@@ -92,7 +92,7 @@ eclipse {
 defaultTasks "bootRun"
 
 springBoot {
-    mainClassName = "com.fahkap.eoo.quiz.EooquizApp"
+    mainClassName = "com.fahkap.eoo.quiz.EooQuizApp"
 }
 
 test {

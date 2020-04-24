@@ -54,8 +54,8 @@ fun isAuthenticated(): Mono<Boolean> {
         .map(Authentication::getAuthorities)
         .map {
             it
-            .map(GrantedAuthority::getAuthority)
-            .none { it == ANONYMOUS }
+                .map(GrantedAuthority::getAuthority)
+                .none { it == ANONYMOUS }
         }
 }
 
@@ -68,12 +68,12 @@ fun isAuthenticated(): Mono<Boolean> {
  * @return true if the current user has the authority, false otherwise.
  */
 fun isCurrentUserInRole(authority: String): Mono<Boolean> {
-  return ReactiveSecurityContextHolder.getContext()
-      .map(SecurityContext::getAuthentication)
-      .map(Authentication::getAuthorities)
-      .map {
-          it
-          .map(GrantedAuthority::getAuthority)
-          .any { it == authority }
-      }
+    return ReactiveSecurityContextHolder.getContext()
+        .map(SecurityContext::getAuthentication)
+        .map(Authentication::getAuthorities)
+        .map {
+            it
+                .map(GrantedAuthority::getAuthority)
+                .any { it == authority }
+        }
 }

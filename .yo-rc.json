@@ -6,13 +6,13 @@
     },
     "jhipsterVersion": "6.8.0",
     "applicationType": "microservice",
-    "baseName": "eooquiz",
+    "baseName": "eooQuiz",
     "packageName": "com.fahkap.eoo.quiz",
     "packageFolder": "com/fahkap/eoo/quiz",
     "serverPort": "9878",
     "authenticationType": "jwt",
     "cacheProvider": "no",
-    "enableHibernateCache": false,
+    "enableHibernateCache": true,
     "websocket": false,
     "databaseType": "mongodb",
     "devDatabaseType": "mongodb",
@@ -35,14 +35,6 @@
         "version": "2.5.0"
       },
       {
-        "name": "generator-jhipster-primeng",
-        "version": "3.0.0"
-      },
-      {
-        "name": "generator-jhipster-primeng-charts",
-        "version": "1.2.0"
-      },
-      {
         "name": "generator-jhipster-testcontainers",
         "version": "1.1.0"
       },
@@ -51,37 +43,30 @@
         "version": "1.0.1"
       },
       {
-        "name": "generator-jhipster-angular-material-integration",
-        "version": "1.0.17"
-      },
-      {
         "name": "generator-jhipster-jgitver",
         "version": "0.1.0"
       },
       {
         "name": "generator-jhipster-kotlin",
         "version": "1.6.0"
-      },
-      {
-        "name": "generator-jhipster-primeng-blueprint",
-        "version": "0.0.19"
       }
     ],
     "enableTranslation": true,
     "clientPackageManager": "npm",
     "nativeLanguage": "en",
-    "languages": ["en", "nl", "fr", "de"],
+    "languages": [
+      "en",
+      "nl",
+      "fr",
+      "de"
+    ],
     "blueprints": [
       {
         "name": "generator-jhipster-kotlin",
         "version": "1.6.0"
-      },
-      {
-        "name": "generator-jhipster-primeng-blueprint",
-        "version": "0.0.19"
       }
     ],
-    "reactive": true,
+    "reactive": false,
     "skipClient": true,
     "skipUserManagement": true
   }

@@ -1,6 +1,6 @@
 package com.fahkap.eoo.quiz.web.rest.errors
 
-import com.fahkap.eoo.quiz.EooquizApp
+import com.fahkap.eoo.quiz.EooQuizApp
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -15,7 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
  */
 @WithMockUser
 @AutoConfigureWebTestClient
-@SpringBootTest(classes = [EooquizApp::class])
+@SpringBootTest(classes = [EooQuizApp::class])
 class ExceptionTranslatorIT {
 
     @Autowired
