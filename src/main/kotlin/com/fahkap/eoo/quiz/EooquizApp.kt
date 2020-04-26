@@ -1,27 +1,36 @@
 package com.fahkap.eoo.quiz
 
+import com.fahkap.eoo.quiz.client.OAuth2InterceptedFeignConfiguration
 import com.fahkap.eoo.quiz.config.ApplicationProperties
 import io.github.jhipster.config.DefaultProfileUtil
 import io.github.jhipster.config.JHipsterConstants
-import java.net.InetAddress
-import java.net.UnknownHostException
-import javax.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.core.env.Environment
+import java.net.InetAddress
+import java.net.UnknownHostException
+import javax.annotation.PostConstruct
 
+@ComponentScan(
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [OAuth2InterceptedFeignConfiguration::class]
+    )]
+)
 @SpringBootApplication
 @EnableConfigurationProperties(ApplicationProperties::class)
 @EnableDiscoveryClient
-class EooquizApp(private val env: Environment) {
+class EooQuizApp(private val env: Environment) {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
     /**
-     * Initializes eooquiz.
+     * Initializes eooQuiz.
      *
      * Spring profiles can be configured with a program argument --spring.profiles.active=your-active-profile
      *
@@ -58,13 +67,13 @@ class EooquizApp(private val env: Environment) {
          */
         @JvmStatic
         fun main(args: Array<String>) {
-            val env = runApplication<EooquizApp>(*args) { DefaultProfileUtil.addDefaultProfile(this) }.environment
+            val env = runApplication<EooQuizApp>(*args) { DefaultProfileUtil.addDefaultProfile(this) }.environment
             logApplicationStartup(env)
         }
 
         @JvmStatic
         private fun logApplicationStartup(env: Environment) {
-            val log = LoggerFactory.getLogger(EooquizApp::class.java)
+            val log = LoggerFactory.getLogger(EooQuizApp::class.java)
 
             var protocol = "http"
             if (env.getProperty("server.ssl.key-store") != null) {

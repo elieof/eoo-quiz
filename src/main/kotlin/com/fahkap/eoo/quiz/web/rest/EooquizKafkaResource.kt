@@ -1,52 +1,39 @@
 package com.fahkap.eoo.quiz.web.rest
 
 import com.fahkap.eoo.quiz.config.KafkaProperties
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.Logger
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.kafka.receiver.KafkaReceiver
-import reactor.kafka.receiver.ReceiverOptions
-import reactor.kafka.sender.KafkaSender
-import reactor.kafka.sender.SenderOptions
-import reactor.kafka.sender.SenderRecord
-import reactor.kafka.sender.SenderResult
-
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ExecutionException
-
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @RestController
-@RequestMapping("/api/eooquiz-kafka")
-class EooquizKafkaResource(
+@RequestMapping("/api/eoo-quiz-kafka")
+class EooQuizKafkaResource(
     private val kafkaProperties: KafkaProperties
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
-    private lateinit var sender: KafkaSender<String, String>
+    private lateinit var producer: KafkaProducer<String, String>
+    private lateinit var sseExecutorService: ExecutorService
 
     init {
-        sender = KafkaSender.create(SenderOptions.create(kafkaProperties.getProducerProps()))
+        producer = KafkaProducer<String, String>(kafkaProperties.getProducerProps())
+        sseExecutorService = Executors.newCachedThreadPool()
     }
 
     @PostMapping("/publish/{topic}")
     @Throws(*[ExecutionException::class, InterruptedException::class])
-    fun publish(@PathVariable topic: String, @RequestParam message: String, @RequestParam(required = false) key: String?): Mono<PublishResult> {
+    fun publish(@PathVariable topic: String, @RequestParam message: String, @RequestParam(required = false) key: String?): PublishResult {
         log.debug("REST request to send to Kafka topic $topic with key $key the message : $message")
-        return Mono.just(SenderRecord.create(topic, null, null, key, message, null))
-            .as(sender::send)
-            .next()
-            .map(SenderResult::recordMetadata)
-            .map { metadata ->
-                PublishResult(metadata.topic(), metadata.partition(), metadata.offset(), Instant.ofEpochMilli(metadata.timestamp()))
-            }
+        val metadata = producer.send(ProducerRecord(topic, key, message)).get()
+        return PublishResult(metadata.topic(), metadata.partition(), metadata.offset(), Instant.ofEpochMilli(metadata.timestamp()))
     }
 
     @GetMapping("/consume")
@@ -56,10 +43,28 @@ class EooquizKafkaResource(
         consumerProps.putAll(consumerParams)
         consumerProps.remove("topic")
 
-        val receiverOptions = ReceiverOptions.<String, String>create(consumerProps).subscription(topics)
-        return KafkaReceiver.create(receiverOptions)
-                .receive()
-                .map(ConsumerRecord::value)
+        val emitter = SseEmitter(0L)
+        sseExecutorService.execute {
+            val consumer = KafkaConsumer<String, String>(consumerProps)
+            emitter.onCompletion(consumer::close)
+            consumer.subscribe(topics)
+            var exitLoop = false
+
+            while (!exitLoop) {
+                try {
+                    val records = consumer.poll(Duration.ofSeconds(5L))
+                    records.forEach { emitter.send(it.value()) }
+                    emitter.send(SseEmitter.event().comment(""))
+                } catch (ex: Exception) {
+                    log.trace("Complete with error ${ex.message}", ex)
+                    emitter.completeWithError(ex)
+                    exitLoop = true
+                }
+            }
+            consumer.close()
+            emitter.complete()
+        }
+        return emitter
     }
 
     class PublishResult(
