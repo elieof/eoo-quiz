@@ -1,5 +1,6 @@
 package com.fahkap.eoo.quiz
 
+import com.fahkap.eoo.quiz.client.OAuth2InterceptedFeignConfiguration
 import com.fahkap.eoo.quiz.config.ApplicationProperties
 import io.github.jhipster.config.DefaultProfileUtil
 import io.github.jhipster.config.JHipsterConstants
@@ -8,11 +9,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.core.env.Environment
 import java.net.InetAddress
 import java.net.UnknownHostException
 import javax.annotation.PostConstruct
 
+@ComponentScan(
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [OAuth2InterceptedFeignConfiguration::class]
+    )]
+)
 @SpringBootApplication
 @EnableConfigurationProperties(ApplicationProperties::class)
 @EnableDiscoveryClient

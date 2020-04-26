@@ -58,6 +58,12 @@ server:
   port: 10344
   address: localhost
 
+uaa:
+  key-store:
+    name: config/tls/keystore-test.p12
+    password: password
+    alias: selfsigned
+
 # ===================================================================
 # JHipster specific properties
 #
@@ -82,6 +88,11 @@ jhipster:
         base64-secret: Nzc5Zjk0NGQwMzViNjI0YTg1ZWViM2RiNjViZWUwZDdmN2Q0ZmY2MjMyODczMzJmZmEzMTE5NzY0ODhmMzBmMWRmZmVjNWY2NzhjZGVkNDQyMzI2MWU2NWFkYTE2MmYwMThkMTgyNGM1OWVjNDU1ODg0YzIyYTI2ZWM4MDc1MTY=
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
+    client-authorization:
+      access-token-uri: http://eo2uaa/oauth/token
+      token-service-id: eo2uaa
+      client-id: internal
+      client-secret: internal
   metrics:
     logs: # Reports metrics in the logs
       enabled: true

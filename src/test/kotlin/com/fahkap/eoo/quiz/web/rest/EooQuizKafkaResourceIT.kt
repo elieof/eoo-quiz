@@ -5,20 +5,24 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.http.MediaType
-import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.testcontainers.containers.KafkaContainer
 import java.time.Duration
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EooQuizKafkaResourceIT {
 
-    private lateinit var client: WebTestClient
+    private lateinit var restMockMvc: MockMvc
 
     private var started = false
 
@@ -37,7 +41,6 @@ class EooQuizKafkaResourceIT {
         kafkaContainer.start()
     }
 
-
     @BeforeEach
     fun setup() {
         val kafkaProperties = KafkaProperties()
@@ -50,15 +53,15 @@ class EooQuizKafkaResourceIT {
 
         val kafkaResource = EooQuizKafkaResource(kafkaProperties)
 
-        client = WebTestClient.bindToController(kafkaResource).build()
+        restMockMvc = MockMvcBuilders.standaloneSetup(kafkaResource).build()
     }
 
     @Test
+    @Throws(Exception::class)
     fun producesMessages() {
-        client.post().uri("/api/jhipster-kafka/publish/topic-produce?message=value-produce")
-            .exchange()
-            .expectStatus().isOk
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+        restMockMvc.perform(post("/api/eoo-quiz-kafka/publish/topic-produce?message=value-produce"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         val consumerProps = getConsumerProps("group-produce")
         val consumer = KafkaConsumer<String, String>(consumerProps)
@@ -71,21 +74,26 @@ class EooQuizKafkaResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun consumesMessages() {
         val producerProps = getProducerProps()
         val producer = KafkaProducer<String, String>(producerProps)
 
         producer.send(ProducerRecord<String, String>("topic-consume", "value-consume"))
 
-        val value = client.get().uri("/api/jhipster-kafka/consume?topic=topic-consume")
-            .accept(MediaType.TEXT_EVENT_STREAM)
-            .exchange()
-            .expectStatus().isOk
-            .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-            .returnResult(String.class)
-            .getResponseBody().blockFirst(Duration.ofSeconds(10))
+        val mvcResult = restMockMvc.perform(get("/api/eoo-quiz-kafka/consume?topic=topic-consume"))
+            .andExpect(status().isOk)
+            .andExpect(request().asyncStarted())
+            .andReturn()
 
-        assertThat(value).isEqualTo("value-consume")
+        for (i in 0..100) {
+            Thread.sleep(100)
+            val content = mvcResult.response.contentAsString
+            if (content.contains("data:value-consume")) {
+                return
+            }
+        }
+        fail<String>("Expected content data:value-consume not received")
     }
 
     private fun getProducerProps(): MutableMap<String, Any> {

@@ -4,17 +4,17 @@ import io.github.jhipster.web.util.HeaderUtil
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.ConcurrencyFailureException
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.support.WebExchangeBindException
-import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.context.request.NativeWebRequest
 import org.zalando.problem.DefaultProblem
 import org.zalando.problem.Problem
 import org.zalando.problem.Status
-import org.zalando.problem.spring.webflux.advice.ProblemHandling
-import org.zalando.problem.spring.webflux.advice.security.SecurityAdviceTrait
+import org.zalando.problem.spring.web.advice.ProblemHandling
+import org.zalando.problem.spring.web.advice.security.SecurityAdviceTrait
 import org.zalando.problem.violations.ConstraintViolationProblem
-import reactor.core.publisher.Mono
+import javax.servlet.http.HttpServletRequest
 
 private const val FIELD_ERRORS_KEY = "fieldErrors"
 private const val MESSAGE_KEY = "message"
@@ -34,19 +34,19 @@ class ExceptionTranslator : ProblemHandling, SecurityAdviceTrait {
     /**
      * Post-process the Problem payload to add the message key for the front-end if needed.
      */
-    override fun process(entity: ResponseEntity<Problem>?, request: ServerWebExchange?): Mono<ResponseEntity<Problem>> {
+    override fun process(entity: ResponseEntity<Problem>?, request: NativeWebRequest?): ResponseEntity<Problem>? {
         if (entity == null) {
-            return Mono.empty()
+            return null
         }
         val problem = entity.body
         if (!(problem is ConstraintViolationProblem || problem is DefaultProblem)) {
-            return Mono.just(entity)
+            return entity
         }
         val builder = Problem.builder()
             .withType(if (Problem.DEFAULT_TYPE == problem.type) DEFAULT_TYPE else problem.type)
             .withStatus(problem.status)
             .withTitle(problem.title)
-            .with(PATH_KEY, request!!.request.path.value())
+            .with(PATH_KEY, request!!.getNativeRequest(HttpServletRequest::class.java)!!.requestURI)
 
         if (problem is ConstraintViolationProblem) {
             builder
@@ -62,21 +62,20 @@ class ExceptionTranslator : ProblemHandling, SecurityAdviceTrait {
                 builder.with(MESSAGE_KEY, "error.http." + problem.status!!.statusCode)
             }
         }
-        return Mono.just(ResponseEntity<Problem>(builder.build(), entity.headers, entity.statusCode))
+        return ResponseEntity(builder.build(), entity.headers, entity.statusCode)
     }
 
-    override fun handleBindingResult(
-        ex: WebExchangeBindException,
-        request: ServerWebExchange
-    ):
-    Mono<ResponseEntity<Problem>> {
+    override fun handleMethodArgumentNotValid(
+        ex: MethodArgumentNotValidException,
+        request: NativeWebRequest
+    ): ResponseEntity<Problem>? {
         val result = ex.bindingResult
         val fieldErrors = result.fieldErrors.map { FieldErrorVM(it.objectName.replaceFirst(Regex("DTO$"), ""), it.field, it.code) }
 
         val problem = Problem.builder()
             .withType(CONSTRAINT_VIOLATION_TYPE)
-            .withTitle("Data binding and validation failure")
-            .withStatus(Status.BAD_REQUEST)
+            .withTitle("Method argument not valid")
+            .withStatus(defaultConstraintViolationStatus())
             .with(MESSAGE_KEY, ERR_VALIDATION)
             .with(FIELD_ERRORS_KEY, fieldErrors)
             .build()
@@ -86,15 +85,15 @@ class ExceptionTranslator : ProblemHandling, SecurityAdviceTrait {
     @ExceptionHandler
     fun handleBadRequestAlertException(
         ex: BadRequestAlertException,
-        request: ServerWebExchange
-    ): Mono<ResponseEntity<Problem>> =
+        request: NativeWebRequest
+    ): ResponseEntity<Problem>? =
         create(
             ex, request,
             HeaderUtil.createFailureAlert(applicationName, true, ex.entityName, ex.errorKey, ex.message)
         )
 
     @ExceptionHandler
-    fun handleConcurrencyFailure(ex: ConcurrencyFailureException, request: ServerWebExchange): Mono<ResponseEntity<Problem>> {
+    fun handleConcurrencyFailure(ex: ConcurrencyFailureException, request: NativeWebRequest): ResponseEntity<Problem>? {
         val problem = Problem.builder()
             .withStatus(Status.CONFLICT)
             .with(MESSAGE_KEY, ERR_CONCURRENCY_FAILURE)

@@ -1,64 +1,46 @@
 
 entity Topic {
-  name String required
+  name String required unique minlength(2) maxlength(50)
 }
 
 entity Proposition {
-  statement String required,
+  statement String required minlength(2),
   valid Boolean required,
   explanation String
 }
 
 entity Question{
-	statement String required,
+	statement String required minlength(3),
     level Integer required
 }
 
 entity Quiz{
-	name String,
+	name String required minlength(2),
 	description String
 }
 
 entity QResult{
+	username String unique
 	valid Boolean required
-}
-
-relationship ManyToOne {
-  Question{topic} to Topic
 }
 
 relationship OneToMany {
   Question{proposition} to Proposition
-}
-
-/*
-relationship ManyToOne {
-  Proposition{question} to Question
-}
-*/
-
-relationship OneToMany {
   Quiz{question} to Question
 }
 
 relationship ManyToOne {
-  QResult{quiz} to Quiz
-}
-
-relationship ManyToOne {
-  QResult{user} to User
-}
-
-relationship ManyToOne {
+  Question{topic} to Topic
   QResult{question} to Question
 }
 
-relationship ManyToOne {
-  QResult{proposition} to Proposition
-}
+
+filter Topic, Quiz
 
 paginate all with pagination
 
 dto * with mapstruct
 
 service all with serviceImpl
+
+// microservice Topic, Quiz, Question, Proposition, QResult with eooquiz

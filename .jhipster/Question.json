@@ -1,0 +1,55 @@
+{
+  "name": "Question",
+  "fields": [
+    {
+      "fieldName": "statement",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required",
+        "minlength"
+      ],
+      "fieldValidateRulesMinlength": "3"
+    },
+    {
+      "fieldName": "level",
+      "fieldType": "Integer",
+      "fieldValidateRules": [
+        "required"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "proposition",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "proposition"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "topic",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "topic",
+      "otherEntityField": "id"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "quiz",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "quiz",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20200425113900",
+  "entityTableName": "question",
+  "dto": "mapstruct",
+  "pagination": "pagination",
+  "service": "serviceImpl",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "eooQuiz",
+  "applications": "*",
+  "microserviceName": "eooQuiz"
+}

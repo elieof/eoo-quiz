@@ -4,20 +4,17 @@ package com.fahkap.eoo.quiz.security
 
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
-import reactor.core.publisher.Mono
+import java.util.*
 
 /**
  * Get the login of the current user.
  *
  * @return the login of the current user.
  */
-fun getCurrentUserLogin(): Mono<String> =
-    ReactiveSecurityContextHolder.getContext()
-        .map(SecurityContext::getAuthentication)
-        .flatMap { Mono.justOrEmpty(extractPrincipal(it)) }
+fun getCurrentUserLogin(): Optional<String> =
+    Optional.ofNullable(extractPrincipal(SecurityContextHolder.getContext().authentication))
 
 fun extractPrincipal(authentication: Authentication?): String? {
 
@@ -33,30 +30,21 @@ fun extractPrincipal(authentication: Authentication?): String? {
 }
 
 /**
- * Get the JWT of the current user.
- *
- * @return the JWT of the current user.
- */
-fun getCurrentUserJWT(): Mono<String> =
-    ReactiveSecurityContextHolder.getContext()
-        .map(SecurityContext::getAuthentication)
-        .filter { it.credentials is String }
-        .map { it.credentials as String }
-
-/**
  * Check if a user is authenticated.
  *
  * @return true if the user is authenticated, false otherwise.
  */
-fun isAuthenticated(): Mono<Boolean> {
-    return ReactiveSecurityContextHolder.getContext()
-        .map(SecurityContext::getAuthentication)
-        .map(Authentication::getAuthorities)
-        .map {
-            it
-                .map(GrantedAuthority::getAuthority)
-                .none { it == ANONYMOUS }
+fun isAuthenticated(): Boolean {
+    val authentication = SecurityContextHolder.getContext().authentication
+
+    if (authentication != null) {
+        val isAnonymousUser = getAuthorities(authentication)?.none { it == ANONYMOUS }
+        if (isAnonymousUser != null) {
+            return isAnonymousUser
         }
+    }
+
+    return false
 }
 
 /**
@@ -67,13 +55,19 @@ fun isAuthenticated(): Mono<Boolean> {
  * @param authority the authority to check.
  * @return true if the current user has the authority, false otherwise.
  */
-fun isCurrentUserInRole(authority: String): Mono<Boolean> {
-    return ReactiveSecurityContextHolder.getContext()
-        .map(SecurityContext::getAuthentication)
-        .map(Authentication::getAuthorities)
-        .map {
-            it
-                .map(GrantedAuthority::getAuthority)
-                .any { it == authority }
+fun isCurrentUserInRole(authority: String): Boolean {
+    val authentication = SecurityContextHolder.getContext().authentication
+
+    if (authentication != null) {
+        val isUserPresent = getAuthorities(authentication)?.any { it == authority }
+        if (isUserPresent != null) {
+            return isUserPresent
         }
+    }
+
+    return false
+}
+
+fun getAuthorities(authentication: Authentication): List<String>? {
+    return authentication.authorities.map(GrantedAuthority::getAuthority)
 }

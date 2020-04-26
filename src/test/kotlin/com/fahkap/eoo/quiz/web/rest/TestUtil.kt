@@ -6,14 +6,17 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import org.assertj.core.api.Assertions.assertThat
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeDiagnosingMatcher
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
+import org.springframework.format.support.DefaultFormattingConversionService
+import org.springframework.format.support.FormattingConversionService
 import java.io.IOException
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
-import org.assertj.core.api.Assertions.assertThat
-import org.hamcrest.Description
-import org.hamcrest.TypeSafeDiagnosingMatcher
 
 private val mapper = createObjectMapper()
 
@@ -78,7 +81,7 @@ fun sameInstant(date: ZonedDateTime) = ZonedDateTimeMatcher(date)
  */
 fun <T : Any> equalsVerifier(clazz: KClass<T>) {
     val domainObject1 = clazz.createInstance()
-    assertThat(domainObject1.toString()).isNotNull()
+    assertThat(domainObject1.toString()).isNotNull
     assertThat(domainObject1).isEqualTo(domainObject1)
     assertThat(domainObject1.hashCode()).isEqualTo(domainObject1.hashCode())
     // Test with an instance of another class
@@ -90,6 +93,18 @@ fun <T : Any> equalsVerifier(clazz: KClass<T>) {
     assertThat(domainObject1).isNotEqualTo(domainObject2)
     // HashCodes are equals because the objects are not persisted yet
     assertThat(domainObject1.hashCode()).isEqualTo(domainObject2.hashCode())
+}
+
+/**
+ * Create a [FormattingConversionService] which use ISO date format, instead of the localized one.
+ * @return the created [FormattingConversionService].
+ */
+fun createFormattingConversionService(): FormattingConversionService {
+    val dfcs = DefaultFormattingConversionService()
+    val registrar = DateTimeFormatterRegistrar()
+    registrar.setUseIsoFormat(true)
+    registrar.registerFormatters(dfcs)
+    return dfcs
 }
 
 const val TEST_USER_LOGIN = "test"

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Test class for the Security Utility methods.
@@ -13,67 +13,40 @@ class SecurityUtilsUnitTest {
 
     @Test
     fun testgetCurrentUserLogin() {
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        securityContext.authentication = UsernamePasswordAuthenticationToken("admin", "admin")
+        SecurityContextHolder.setContext(securityContext)
         val login = getCurrentUserLogin()
-            .subscriberContext(
-                ReactiveSecurityContextHolder.withAuthentication(
-                    UsernamePasswordAuthenticationToken("admin", "admin")
-                )
-            )
-            .block()
-        assertThat(login).isEqualTo("admin")
-    }
-
-    @Test
-    fun testgetCurrentUserJWT() {
-        val jwt = getCurrentUserJWT()
-            .subscriberContext(
-                ReactiveSecurityContextHolder.withAuthentication(
-                    UsernamePasswordAuthenticationToken("admin", "token")
-                )
-            )
-            .block()
-        assertThat(jwt).isEqualTo("token")
+        assertThat(login).contains("admin")
     }
 
     @Test
     fun testIsAuthenticated() {
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        securityContext.authentication = UsernamePasswordAuthenticationToken("admin", "admin")
+        SecurityContextHolder.setContext(securityContext)
         val isAuthenticated = isAuthenticated()
-            .subscriberContext(
-                ReactiveSecurityContextHolder.withAuthentication(
-                    UsernamePasswordAuthenticationToken("admin", "admin")
-                )
-            )
-            .block()
-        assertThat(isAuthenticated!!).isTrue()
+        assertThat(isAuthenticated).isTrue
     }
 
     @Test
     fun testAnonymousIsNotAuthenticated() {
-        val authorities = mutableListOf(SimpleGrantedAuthority(ANONYMOUS))
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        val authorities = listOf(SimpleGrantedAuthority(ANONYMOUS))
+        securityContext.authentication = UsernamePasswordAuthenticationToken("anonymous", "anonymous", authorities)
+        SecurityContextHolder.setContext(securityContext)
         val isAuthenticated = isAuthenticated()
-            .subscriberContext(
-                ReactiveSecurityContextHolder.withAuthentication(
-                    UsernamePasswordAuthenticationToken("admin", "admin", authorities)
-                )
-            )
-            .block()
-        assertThat(isAuthenticated!!).isFalse()
+        assertThat(isAuthenticated).isFalse
     }
 
     @Test
     fun testIsCurrentUserInRole() {
-        val authorities = mutableListOf(SimpleGrantedAuthority(USER))
-        val context = ReactiveSecurityContextHolder.withAuthentication(
-            UsernamePasswordAuthenticationToken("admin", "admin", authorities)
-        )
-        var isCurrentUserInRole = isCurrentUserInRole(USER)
-            .subscriberContext(context)
-            .block()
-        assertThat(isCurrentUserInRole!!).isTrue()
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        val authorities = listOf(SimpleGrantedAuthority(USER))
+        securityContext.authentication = UsernamePasswordAuthenticationToken("user", "user", authorities)
+        SecurityContextHolder.setContext(securityContext)
 
-        isCurrentUserInRole = isCurrentUserInRole(ADMIN)
-            .subscriberContext(context)
-            .block()
-        assertThat(isCurrentUserInRole!!).isFalse()
+        assertThat(isCurrentUserInRole(USER)).isTrue
+        assertThat(isCurrentUserInRole(ADMIN)).isFalse
     }
 }

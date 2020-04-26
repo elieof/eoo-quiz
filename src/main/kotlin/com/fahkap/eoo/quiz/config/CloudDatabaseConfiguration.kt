@@ -2,9 +2,7 @@ package com.fahkap.eoo.quiz.config
 
 import com.github.mongobee.Mongobee
 import io.github.jhipster.config.JHipsterConstants
-import io.github.jhipster.domain.util.JSR310DateConverters.DateToZonedDateTimeConverter
-import io.github.jhipster.domain.util.JSR310DateConverters.DurationToLongConverter
-import io.github.jhipster.domain.util.JSR310DateConverters.ZonedDateTimeToDateConverter
+import io.github.jhipster.domain.util.JSR310DateConverters.*
 import org.slf4j.LoggerFactory
 import org.springframework.cloud.Cloud
 import org.springframework.cloud.CloudException
@@ -18,11 +16,11 @@ import org.springframework.data.mongodb.MongoDbFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 
 @Configuration
-@EnableReactiveMongoRepositories("com.fahkap.eoo.quiz.repository")
+@EnableMongoRepositories("com.fahkap.eoo.quiz.repository")
 @Profile(JHipsterConstants.SPRING_PROFILE_CLOUD)
 class CloudDatabaseConfiguration : AbstractCloudConfig() {
 

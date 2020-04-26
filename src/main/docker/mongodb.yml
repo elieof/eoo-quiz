@@ -5,4 +5,4 @@ services:
     ports:
       - '27017:27017'
     # volumes:
-    #     - ~/volumes/jhipster/eooquiz/mongodb/:/data/db/
+    #     - ~/volumes/jhipster/eooQuiz/mongodb/:/data/db/

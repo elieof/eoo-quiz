@@ -1,11 +1,13 @@
 package com.fahkap.eoo.quiz.domain
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import java.io.Serializable
-import java.time.Instant
+import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Field
+import java.io.Serializable
+import java.time.Instant
 
 /**
  * Base abstract class for entities which will hold definitions for created, last modified by, created by,
@@ -13,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Field
  */
 abstract class AbstractAuditingEntity(
 
+    @CreatedBy
     @Field("created_by")
     @JsonIgnore
     var createdBy: String? = null,
@@ -22,6 +25,7 @@ abstract class AbstractAuditingEntity(
     @JsonIgnore
     var createdDate: Instant? = Instant.now(),
 
+    @LastModifiedBy
     @Field("last_modified_by")
     @JsonIgnore
     var lastModifiedBy: String? = null,

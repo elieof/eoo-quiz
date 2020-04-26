@@ -1,122 +1,117 @@
 package com.fahkap.eoo.quiz.web.rest.errors
 
 import com.fahkap.eoo.quiz.EooQuizApp
+import com.fahkap.eoo.quiz.config.SecurityBeanOverrideConfiguration
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 /**
  * Integration tests [ExceptionTranslator] controller advice.
  */
 @WithMockUser
-@AutoConfigureWebTestClient
-@SpringBootTest(classes = [EooQuizApp::class])
+@AutoConfigureMockMvc
+@SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
 class ExceptionTranslatorIT {
 
     @Autowired
-    private lateinit var webTestClient: WebTestClient
+    private lateinit var mockMvc: MockMvc
 
     @Test
+    @Throws(Exception::class)
     fun testConcurrencyFailure() {
-        webTestClient.get().uri("/api/exception-translator-test/concurrency-failure")
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo(ERR_CONCURRENCY_FAILURE)
+        mockMvc.perform(get("/api/exception-translator-test/concurrency-failure").with(csrf()))
+            .andExpect(status().isConflict)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value(ERR_CONCURRENCY_FAILURE))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testMethodArgumentNotValid() {
-        webTestClient.post().uri("/api/exception-translator-test/method-argument")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{}")
-            .exchange()
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo(ERR_VALIDATION)
-            .jsonPath("\$.fieldErrors.[0].objectName").isEqualTo("test")
-            .jsonPath("\$.fieldErrors.[0].field").isEqualTo("test")
-            .jsonPath("\$.fieldErrors.[0].message").isEqualTo("NotNull")
+        mockMvc.perform(post("/api/exception-translator-test/method-argument").content("{}").contentType(MediaType.APPLICATION_JSON).with(csrf()))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value(ERR_VALIDATION))
+            .andExpect(jsonPath("\$.fieldErrors.[0].objectName").value("test"))
+            .andExpect(jsonPath("\$.fieldErrors.[0].field").value("test"))
+            .andExpect(jsonPath("\$.fieldErrors.[0].message").value("NotNull"))
     }
 
     @Test
-    fun testMissingRequestPart() {
-        webTestClient.get().uri("/api/exception-translator-test/missing-servlet-request-part")
-            .exchange()
-            .expectStatus().isBadRequest
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.400")
+    @Throws(Exception::class)
+    fun testMissingServletRequestPartException() {
+        mockMvc.perform(get("/api/exception-translator-test/missing-servlet-request-part").with(csrf()))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.400"))
     }
 
     @Test
-    fun testMissingRequestParameter() {
-        webTestClient.get().uri("/api/exception-translator-test/missing-servlet-request-parameter")
-            .exchange()
-            .expectStatus().isBadRequest
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.400")
+    @Throws(Exception::class)
+    fun testMissingServletRequestParameterException() {
+        mockMvc.perform(get("/api/exception-translator-test/missing-servlet-request-parameter").with(csrf()))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.400"))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testAccessDenied() {
-        webTestClient.get().uri("/api/exception-translator-test/access-denied")
-            .exchange()
-            .expectStatus().isForbidden
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.403")
-            .jsonPath("\$.detail").isEqualTo("test access denied!")
+        mockMvc.perform(get("/api/exception-translator-test/access-denied").with(csrf()))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.403"))
+            .andExpect(jsonPath("\$.detail").value("test access denied!"))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testUnauthorized() {
-        webTestClient.get().uri("/api/exception-translator-test/unauthorized")
-            .exchange()
-            .expectStatus().isUnauthorized
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.401")
-            .jsonPath("$.path").isEqualTo("/api/exception-translator-test/unauthorized")
-            .jsonPath("\$.detail").isEqualTo("test authentication failed!")
+        mockMvc.perform(get("/api/exception-translator-test/unauthorized").with(csrf()))
+            .andExpect(status().isUnauthorized)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.401"))
+            .andExpect(jsonPath("\$.path").value("/api/exception-translator-test/unauthorized"))
+            .andExpect(jsonPath("\$.detail").value("test authentication failed!"))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testMethodNotSupported() {
-        webTestClient.post().uri("/api/exception-translator-test/access-denied")
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.405")
-            .jsonPath("\$.detail").isEqualTo("405 METHOD_NOT_ALLOWED \"Request method 'POST' not supported\"")
+        mockMvc.perform(post("/api/exception-translator-test/access-denied").with(csrf()))
+            .andExpect(status().isMethodNotAllowed)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.405"))
+            .andExpect(jsonPath("\$.detail").value("Request method 'POST' not supported"))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testExceptionWithResponseStatus() {
-        webTestClient.get().uri("/api/exception-translator-test/response-status")
-            .exchange()
-            .expectStatus().isBadRequest
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.400")
-            .jsonPath("\$.title").isEqualTo("test response status")
+        mockMvc.perform(get("/api/exception-translator-test/response-status").with(csrf()))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.400"))
+            .andExpect(jsonPath("\$.title").value("test response status"))
     }
 
     @Test
+    @Throws(Exception::class)
     fun testInternalServerError() {
-        webTestClient.get().uri("/api/exception-translator-test/internal-server-error")
-            .exchange()
-            .expectHeader().contentType(MediaType.APPLICATION_PROBLEM_JSON)
-            .expectBody()
-            .jsonPath("\$.message").isEqualTo("error.http.500")
-            .jsonPath("\$.title").isEqualTo("Internal Server Error")
+        mockMvc.perform(get("/api/exception-translator-test/internal-server-error").with(csrf()))
+            .andExpect(status().isInternalServerError)
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("\$.message").value("error.http.500"))
+            .andExpect(jsonPath("\$.title").value("Internal Server Error"))
     }
 }

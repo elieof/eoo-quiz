@@ -10,9 +10,10 @@
     "packageName": "com.fahkap.eoo.quiz",
     "packageFolder": "com/fahkap/eoo/quiz",
     "serverPort": "9878",
-    "authenticationType": "jwt",
+    "authenticationType": "uaa",
+    "uaaBaseName": "eo2Uaa",
     "cacheProvider": "no",
-    "enableHibernateCache": true,
+    "enableHibernateCache": false,
     "websocket": false,
     "databaseType": "mongodb",
     "devDatabaseType": "mongodb",
@@ -30,6 +31,10 @@
     "entitySuffix": "",
     "dtoSuffix": "DTO",
     "otherModules": [
+      {
+        "name": "generator-jhipster-entity-audit",
+        "version": "3.3.0"
+      },
       {
         "name": "generator-jhipster-docker",
         "version": "2.5.0"
@@ -69,5 +74,12 @@
     "reactive": false,
     "skipClient": true,
     "skipUserManagement": true
-  }
+  },
+  "entities": [
+    "Topic",
+    "Quiz",
+    "Question",
+    "Proposition",
+    "QResult"
+  ]
 }

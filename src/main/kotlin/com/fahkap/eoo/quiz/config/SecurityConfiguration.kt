@@ -1,89 +1,58 @@
 package com.fahkap.eoo.quiz.config
 
+import com.fahkap.eoo.quiz.config.oauth2.OAuth2JwtAccessTokenConverter
+import com.fahkap.eoo.quiz.config.oauth2.OAuth2Properties
 import com.fahkap.eoo.quiz.security.ADMIN
-import com.fahkap.eoo.quiz.security.jwt.JWTFilter
-import com.fahkap.eoo.quiz.security.jwt.TokenProvider
-import org.springframework.boot.autoconfigure.security.SecurityProperties
+import com.fahkap.eoo.quiz.security.oauth2.OAuth2SignatureVerifierClient
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cloud.client.loadbalancer.RestTemplateCustomizer
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.http.HttpMethod
-import org.springframework.security.authentication.ReactiveAuthenticationManager
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder
-import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter
-import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher
-import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher
-import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
-import org.springframework.util.StringUtils
-import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
+import org.springframework.web.client.RestTemplate
 
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
-@Import(SecurityProblemSupport::class)
-class SecurityConfiguration(
-    private val tokenProvider: TokenProvider,
-    private val problemSupport: SecurityProblemSupport
-) {
+@Configuration
+@EnableResourceServer
+class SecurityConfiguration(private val oAuth2Properties: OAuth2Properties) : ResourceServerConfigurerAdapter() {
 
-    @Bean
-    fun userDetailsService(properties: SecurityProperties): MapReactiveUserDetailsService {
-        val user = properties.user
-        val userDetails = User
-            .withUsername(user.name)
-            .password("{noop}" + user.password)
-            .roles(*StringUtils.toStringArray(user.roles))
-            .build()
-        return MapReactiveUserDetailsService(userDetails)
-    }
-
-    @Bean
-    fun reactiveAuthenticationManager(userDetailsService: ReactiveUserDetailsService): ReactiveAuthenticationManager {
-        return UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService)
-    }
-
-    @Bean
-    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        // @formatter:off
+    @Throws(Exception::class)
+    override fun configure(http: HttpSecurity) {
         http
-            .securityMatcher(
-                NegatedServerWebExchangeMatcher(
-                    OrServerWebExchangeMatcher(
-                        pathMatchers("/app/**", "/i18n/**", "/content/**", "/swagger-ui/**", "/test/**"),
-                        pathMatchers(HttpMethod.OPTIONS, "/**")
-                    )
-                )
-            )
             .csrf()
             .disable()
-            .addFilterAt(JWTFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
-            .exceptionHandling()
-            .accessDeniedHandler(problemSupport)
-            .authenticationEntryPoint(problemSupport)
-        .and()
             .headers()
-            .contentSecurityPolicy("default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
-        .and()
-            .referrerPolicy(ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-        .and()
-            .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
-        .and()
-            .frameOptions().disable()
-        .and()
-            .authorizeExchange()
-            .pathMatchers("/api/auth-info").permitAll()
-            .pathMatchers("/api/**").authenticated()
-            .pathMatchers("/management/health").permitAll()
-            .pathMatchers("/management/info").permitAll()
-            .pathMatchers("/management/prometheus").permitAll()
-            .pathMatchers("/management/**").hasAuthority(ADMIN)
-        // @formatter:on
-        return http.build()
+            .frameOptions()
+            .disable()
+            .and()
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .authorizeRequests()
+            .antMatchers("/api/**").authenticated()
+            .antMatchers("/management/health").permitAll()
+            .antMatchers("/management/info").permitAll()
+            .antMatchers("/management/prometheus").permitAll()
+            .antMatchers("/management/**").hasAuthority(ADMIN)
     }
+
+    @Bean
+    fun tokenStore(jwtAccessTokenConverter: JwtAccessTokenConverter) = JwtTokenStore(jwtAccessTokenConverter)
+
+    @Bean
+    fun jwtAccessTokenConverter(signatureVerifierClient: OAuth2SignatureVerifierClient) =
+        OAuth2JwtAccessTokenConverter(oAuth2Properties, signatureVerifierClient)
+
+    @Bean
+    @Qualifier("loadBalancedRestTemplate")
+    fun loadBalancedRestTemplate(customizer: RestTemplateCustomizer) =
+        RestTemplate().apply { customizer.customize(this) }
+
+    @Bean
+    @Qualifier("vanillaRestTemplate")
+    fun vanillaRestTemplate(): RestTemplate = RestTemplate()
 }

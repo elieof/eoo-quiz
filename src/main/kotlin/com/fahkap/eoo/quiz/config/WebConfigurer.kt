@@ -1,31 +1,37 @@
 package com.fahkap.eoo.quiz.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.jhipster.config.JHipsterProperties
 import org.slf4j.LoggerFactory
+import org.springframework.boot.web.servlet.ServletContextInitializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.annotation.Order
-import org.springframework.web.cors.reactive.CorsWebFilter
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import org.springframework.web.reactive.config.WebFluxConfigurer
-import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
-import org.springframework.web.server.WebExceptionHandler
-import org.zalando.problem.spring.webflux.advice.ProblemExceptionHandler
-import org.zalando.problem.spring.webflux.advice.ProblemHandling
+import org.springframework.core.env.Environment
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
+import javax.servlet.ServletContext
+import javax.servlet.ServletException
 
 /**
  * Configuration of web application with Servlet 3.0 APIs.
  */
 @Configuration
 class WebConfigurer(
+    private val env: Environment,
     private val jHipsterProperties: JHipsterProperties
-) : WebFluxConfigurer {
+) : ServletContextInitializer {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Throws(ServletException::class)
+    override fun onStartup(servletContext: ServletContext) {
+        if (env.activeProfiles.isNotEmpty()) {
+            log.info("Web application configuration, using profiles: {}", *env.activeProfiles as Array<*>)
+        }
+        log.info("Web application fully configured")
+    }
+
     @Bean
-    fun corsFilter(): CorsWebFilter {
+    fun corsFilter(): CorsFilter {
         val source = UrlBasedCorsConfigurationSource()
         val config = jHipsterProperties.cors
         if (config.allowedOrigins != null && config.allowedOrigins!!.isNotEmpty()) {
@@ -36,18 +42,6 @@ class WebConfigurer(
                 registerCorsConfiguration("/v2/api-docs", config)
             }
         }
-        return CorsWebFilter(source)
-    }
-
-    // TODO: remove when this is supported in spring-data / spring-boot
-    override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
-        configurer.addCustomResolver(ReactiveSortHandlerMethodArgumentResolver(),
-            ReactivePageableHandlerMethodArgumentResolver())
-    }
-
-    @Bean
-    @Order(-2) // The handler must have precedence over WebFluxResponseStatusExceptionHandler and Spring Boot's ErrorWebExceptionHandler
-    fun problemExceptionHandler(mapper: ObjectMapper, problemHandling: ProblemHandling): WebExceptionHandler {
-        return ProblemExceptionHandler(mapper, problemHandling)
+        return CorsFilter(source)
     }
 }
