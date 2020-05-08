@@ -15,7 +15,7 @@ data class TopicDTO(
     @get: Size(min = 2, max = 50)
     var name: String? = null
 
-) : AbstractAuditingDto(), Serializable {
+) : AbstractAuditingDTO(), Serializable {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -17,7 +17,7 @@ data class QuizDTO(
 
     var description: String? = null
 
-) : AbstractAuditingDto(), Serializable {
+) : AbstractAuditingDTO(), Serializable {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
