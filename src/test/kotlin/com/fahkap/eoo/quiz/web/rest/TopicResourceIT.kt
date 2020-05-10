@@ -2,12 +2,19 @@ package com.fahkap.eoo.quiz.web.rest
 
 import com.fahkap.eoo.quiz.EooQuizApp
 import com.fahkap.eoo.quiz.config.SecurityBeanOverrideConfiguration
+import com.fahkap.eoo.quiz.config.audit.EntityAuditAction
 import com.fahkap.eoo.quiz.domain.Topic
+import com.fahkap.eoo.quiz.repository.EntityAuditEventRepository
 import com.fahkap.eoo.quiz.repository.TopicRepository
+import com.fahkap.eoo.quiz.security.SpringSecurityAuditorAware
 import com.fahkap.eoo.quiz.service.TopicService
 import com.fahkap.eoo.quiz.service.mapper.TopicMapper
 import com.fahkap.eoo.quiz.web.rest.errors.ExceptionTranslator
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.has
+import org.awaitility.kotlin.untilCallTo
 import org.hamcrest.Matchers.hasItem
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,6 +41,15 @@ class TopicResourceIT {
 
     @Autowired
     private lateinit var topicRepository: TopicRepository
+
+    @Autowired
+    private lateinit var entityAuditEventRepository: EntityAuditEventRepository
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var springSecurityAuditorAware: SpringSecurityAuditorAware
 
     @Autowired
     private lateinit var topicMapper: TopicMapper
@@ -93,6 +109,23 @@ class TopicResourceIT {
         assertThat(topicList).hasSize(databaseSizeBeforeCreate + 1)
         val testTopic = topicList[topicList.size - 1]
         assertThat(testTopic.name).isEqualTo(DEFAULT_NAME)
+
+        //validate auditing
+        val expectedVersion = 1
+        val testAudit = await.untilCallTo {
+            entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+                Topic::class.java.name,
+                testTopic.id!!,
+                expectedVersion + 1
+            )
+        } has { commitVersion == expectedVersion }
+        assertThat(testAudit.entityId).isEqualTo(testTopic.id)
+        assertThat(testAudit.entityType).isEqualTo(Topic::class.java.name)
+        assertThat(testAudit.action).isEqualTo(EntityAuditAction.CREATE.name)
+        assertThat(testAudit.commitVersion).isEqualTo(expectedVersion)
+        assertThat(testAudit.entityValue).isEqualTo(objectMapper.writeValueAsString(testTopic))
+        assertThat(testAudit.modifiedBy).isEqualTo(testTopic.createdBy)
+        assertThat(testAudit.modifiedDate).isEqualTo(testTopic.createdDate)
     }
 
     @Test
@@ -195,6 +228,23 @@ class TopicResourceIT {
         assertThat(topicList).hasSize(databaseSizeBeforeUpdate)
         val testTopic = topicList[topicList.size - 1]
         assertThat(testTopic.name).isEqualTo(UPDATED_NAME)
+
+        //validate auditing
+        val expectedVersion = 2
+        val testAudit = await.untilCallTo {
+            entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+                Topic::class.java.name,
+                testTopic.id!!,
+                expectedVersion + 1
+            )
+        } has { commitVersion == expectedVersion }
+        assertThat(testAudit.entityId).isEqualTo(testTopic.id)
+        assertThat(testAudit.entityType).isEqualTo(Topic::class.java.name)
+        assertThat(testAudit.action).isEqualTo(EntityAuditAction.UPDATE.name)
+        assertThat(testAudit.commitVersion).isEqualTo(expectedVersion)
+        assertThat(testAudit.entityValue).isEqualTo(objectMapper.writeValueAsString(testTopic))
+        assertThat(testAudit.modifiedBy).isEqualTo(testTopic.lastModifiedBy)
+        assertThat(testAudit.modifiedDate).isEqualTo(testTopic.lastModifiedDate)
     }
 
     @Test
@@ -219,11 +269,11 @@ class TopicResourceIT {
     @Test
     fun deleteTopic() {
         // Initialize the database
-        topicRepository.save(topic)
+        val savedTopic = topicRepository.save(topic)
 
         val databaseSizeBeforeDelete = topicRepository.findAll().size
 
-        val id = topic.id
+        val id = savedTopic.id
         assertNotNull(id)
 
         // Delete the topic
@@ -235,6 +285,23 @@ class TopicResourceIT {
         // Validate the database contains one less item
         val topicList = topicRepository.findAll()
         assertThat(topicList).hasSize(databaseSizeBeforeDelete - 1)
+
+        //validate auditing
+        val expectedVersion = 2
+        val testAudit = await.untilCallTo {
+            entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+                Topic::class.java.name,
+                id,
+                expectedVersion + 1
+            )
+        } has { commitVersion == expectedVersion }
+        assertThat(testAudit.entityId).isEqualTo(id)
+        assertThat(testAudit.entityType).isEqualTo(Topic::class.java.name)
+        assertThat(testAudit.action).isEqualTo(EntityAuditAction.DELETE.name)
+        assertThat(testAudit.commitVersion).isEqualTo(expectedVersion)
+        assertThat(testAudit.entityValue).contains(id)
+        assertThat(testAudit.modifiedBy).isEqualTo(springSecurityAuditorAware.currentAuditor.get())
+        assertThat(testAudit.modifiedDate).isAfter(savedTopic.lastModifiedDate)
     }
 
     companion object {

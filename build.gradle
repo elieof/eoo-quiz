@@ -256,6 +256,7 @@ dependencies {
     testRuntimeOnly "com.tngtech.archunit:archunit-junit5-engine:${archunit_junit5_version}"
     testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo"
     testImplementation "org.testcontainers:kafka"
+    testImplementation "org.awaitility:awaitility-kotlin:${awaitility_version}"
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
 }
 

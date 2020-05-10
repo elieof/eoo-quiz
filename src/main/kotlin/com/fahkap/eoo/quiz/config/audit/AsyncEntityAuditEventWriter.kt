@@ -82,7 +82,8 @@ class AsyncEntityAuditEventWriter(
     private fun calculateVersion(auditedEntity: EntityAuditEvent) {
         log.trace("Version calculation. for update/remove")
         val lastCommitVersion: Int? = getLastEntityAuditedEvent(
-            auditedEntity.entityType!!, auditedEntity.entityId!!)?.commitVersion
+            auditedEntity.entityType!!, auditedEntity.entityId!!
+        )?.commitVersion
         log.trace("Last commit version of entity => {}", lastCommitVersion)
         if (lastCommitVersion != null && lastCommitVersion != 0) {
             log.trace("Present. Adding version..")
@@ -94,6 +95,6 @@ class AsyncEntityAuditEventWriter(
     }
 
     fun getLastEntityAuditedEvent(type: String, entityId: String): EntityAuditEvent? {
-        return entityAuditEventRepository.findMaxCommitVersion(type, entityId)
+        return entityAuditEventRepository.findLastEntityAuditedEvent(type, entityId)
     }
 }

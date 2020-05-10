@@ -21,9 +21,9 @@ class EntityAuditEventListener(
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Async
     override fun onAfterSave(event: AfterSaveEvent<AbstractAuditingEntity>) {
         super.onAfterSave(event)
+
         val auditedEntity = event.source
         if (auditedEntity.lastModifiedDate?.isAfter(auditedEntity.createdDate)!!) {
             asyncEntityAuditEventWriter.writeAuditEvent(auditedEntity, EntityAuditAction.UPDATE)
@@ -39,11 +39,14 @@ class EntityAuditEventListener(
         val auditedEntity = asyncEntityAuditEventWriter.getLastEntityAuditedEvent(
             event.type!!.typeName, event.source["_id"].toString()
         )
-        auditedEntity?.entityValue = "{\"id\" : \"" + event.source["_id"].toString() + "\"}"
-        auditedEntity?.action = EntityAuditAction.DELETE.value
-        auditedEntity?.modifiedBy = springSecurityAuditorAware.currentAuditor.get()
-        auditedEntity?.modifiedDate = Instant.now()
 
-        auditedEntity?.let { asyncEntityAuditEventWriter.writeAuditEvent(it) }
+        auditedEntity?.let {
+            it.entityValue = "{\"id\" : \"" + event.source["_id"].toString() + "\"}"
+            it.action = EntityAuditAction.DELETE.value
+            it.modifiedBy = springSecurityAuditorAware.currentAuditor.get()
+            it.modifiedDate = Instant.now()
+            it.commitVersion = it.commitVersion!!.plus(1)
+            asyncEntityAuditEventWriter.writeAuditEvent(it)
+        }
     }
 }

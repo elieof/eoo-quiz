@@ -16,10 +16,13 @@ class EntityAuditEventRepositoryCustomImpl(
     private val mongoTemplate: MongoTemplate
 ) : EntityAuditEventRepositoryCustom {
 
-    override fun findMaxCommitVersion(type: String, entityId: String): EntityAuditEvent? {
-        val query = Query(Criteria().andOperator(
-            EntityAuditEvent::entityType isEqualTo type,
-            EntityAuditEvent::entityId isEqualTo entityId))
+    override fun findLastEntityAuditedEvent(type: String, entityId: String): EntityAuditEvent? {
+        val query = Query(
+            Criteria().andOperator(
+                EntityAuditEvent::entityType isEqualTo type,
+                EntityAuditEvent::entityId isEqualTo entityId
+            )
+        )
             .limit(1)
             .with(Sort.by(Sort.Direction.DESC, "commit_version"))
 
@@ -33,14 +36,21 @@ class EntityAuditEventRepositoryCustomImpl(
             .all()
     }
 
-    override fun findOneByEntityTypeAndEntityIdAndCommitVersion(type: String, entityId: String, commitVersion: Int): EntityAuditEvent? {
+    override fun findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+        type: String,
+        entityId: String,
+        commitVersion: Int
+    ): EntityAuditEvent? {
         val entityAuditEvent = findMaxCommitVersion(type, entityId, commitVersion)
 
         entityAuditEvent?.let {
-            val query = Query(Criteria().andOperator(
-                EntityAuditEvent::entityType isEqualTo type,
-                EntityAuditEvent::entityId isEqualTo entityId,
-                EntityAuditEvent::commitVersion isEqualTo entityAuditEvent.commitVersion))
+            val query = Query(
+                Criteria().andOperator(
+                    EntityAuditEvent::entityType isEqualTo type,
+                    EntityAuditEvent::entityId isEqualTo entityId,
+                    EntityAuditEvent::commitVersion isEqualTo entityAuditEvent.commitVersion
+                )
+            )
 
             return mongoTemplate.findOne<EntityAuditEvent>(query)
         }
@@ -48,10 +58,13 @@ class EntityAuditEventRepositoryCustomImpl(
     }
 
     private fun findMaxCommitVersion(type: String, entityId: String, commitVersion: Int): EntityAuditEvent? {
-        val query = Query(Criteria().andOperator(
-            EntityAuditEvent::entityType isEqualTo type,
-            EntityAuditEvent::entityId isEqualTo entityId,
-            EntityAuditEvent::commitVersion lt commitVersion))
+        val query = Query(
+            Criteria().andOperator(
+                EntityAuditEvent::entityType isEqualTo type,
+                EntityAuditEvent::entityId isEqualTo entityId,
+                EntityAuditEvent::commitVersion lt commitVersion
+            )
+        )
             .limit(1)
             .with(Sort.by(Sort.Direction.DESC, "commit_version"))
 

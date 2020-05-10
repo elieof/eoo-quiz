@@ -40,6 +40,6 @@ class EntityAuditEventServiceImpl(
 
         log.debug("Request to get Audit entity by type, id and commit version")
 
-        return entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndCommitVersion(entityType, entityId, commitVersion)?.let { entityAuditEventMapper.toDto(it) }
+        return entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(entityType, entityId, commitVersion)?.let { entityAuditEventMapper.toDto(it) }
     }
 }

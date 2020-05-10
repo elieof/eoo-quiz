@@ -4,9 +4,13 @@ import com.fahkap.eoo.quiz.domain.EntityAuditEvent
 
 interface EntityAuditEventRepositoryCustom {
 
-    fun findMaxCommitVersion(type: String, entityId: String): EntityAuditEvent?
+    fun findLastEntityAuditedEvent(type: String, entityId: String): EntityAuditEvent?
 
     fun findAllEntityTypes(): MutableList<String>
 
-    fun findOneByEntityTypeAndEntityIdAndCommitVersion(type: String, entityId: String, commitVersion: Int): EntityAuditEvent?
+    fun findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+        type: String,
+        entityId: String,
+        commitVersion: Int
+    ): EntityAuditEvent?
 }
