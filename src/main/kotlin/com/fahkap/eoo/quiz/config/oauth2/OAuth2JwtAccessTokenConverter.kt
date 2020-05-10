@@ -60,18 +60,19 @@ class OAuth2JwtAccessTokenConverter(
         if (time - lastKeyFetchTimestamp < oAuth2Properties.signatureVerification.publicKeyRefreshRateLimit ?: 0) {
             return false
         }
+        var result = false
         try {
             val verifier = signatureVerifierClient.getSignatureVerifier()
             if (verifier != null) {
                 setVerifier(verifier)
                 lastKeyFetchTimestamp = time
                 log.debug("Public key retrieved from OAuth2 server to create SignatureVerifier")
-                return true
+                result = true
             }
         } catch (ex: Throwable) {
             log.error("could not get public key from OAuth2 server to create SignatureVerifier", ex)
         }
-        return false
+        return result
     }
 
     /**

@@ -15,10 +15,7 @@ class AuditEventConverter {
      * @return the converted list.
      */
     fun convertToAuditEvent(persistentAuditEvents: Iterable<PersistentAuditEvent>?) =
-        when (persistentAuditEvents) {
-            null -> mutableListOf()
-            else -> persistentAuditEvents.asSequence().mapNotNull { convertToAuditEvent(it) }.toMutableList()
-        }
+        persistentAuditEvents?.asSequence()?.mapNotNull { convertToAuditEvent(it) }?.toMutableList() ?: mutableListOf()
 
     /**
      * Convert a [PersistentAuditEvent] to an [AuditEvent].
@@ -27,13 +24,11 @@ class AuditEventConverter {
      * @return the converted list.
      */
     fun convertToAuditEvent(persistentAuditEvent: PersistentAuditEvent?): AuditEvent? =
-        when (persistentAuditEvent) {
-            null -> null
-            else -> AuditEvent(
-                persistentAuditEvent.auditEventDate, persistentAuditEvent.principal,
-                persistentAuditEvent.auditEventType, convertDataToObjects(persistentAuditEvent.data)
-            )
-        }
+        if (persistentAuditEvent == null) null
+        else AuditEvent(
+            persistentAuditEvent.auditEventDate, persistentAuditEvent.principal,
+            persistentAuditEvent.auditEventType, convertDataToObjects(persistentAuditEvent.data)
+        )
 
     /**
      * Internal conversion. This is needed to support the current SpringBoot actuator[ AuditEventRepository] interface.

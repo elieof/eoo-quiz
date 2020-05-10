@@ -37,31 +37,9 @@ data class EntityAuditEventDTO(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as EntityAuditEventDTO
-
-        if (id != other.id) return false
-        if (entityId != other.entityId) return false
-        if (entityType != other.entityType) return false
-        if (action != other.action) return false
-        if (entityValue != other.entityValue) return false
-        if (commitVersion != other.commitVersion) return false
-        if (modifiedBy != other.modifiedBy) return false
-        if (modifiedDate != other.modifiedDate) return false
-
-        return true
+        if (other !is EntityAuditEventDTO) return false
+        return id != null && other.id != null && id == other.id
     }
 
-    override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + (entityId?.hashCode() ?: 0)
-        result = 31 * result + (entityType?.hashCode() ?: 0)
-        result = 31 * result + (action?.hashCode() ?: 0)
-        result = 31 * result + (entityValue?.hashCode() ?: 0)
-        result = 31 * result + (commitVersion?.hashCode() ?: 0)
-        result = 31 * result + (modifiedBy?.hashCode() ?: 0)
-        result = 31 * result + (modifiedDate?.hashCode() ?: 0)
-        return result
-    }
+    override fun hashCode() = id.hashCode()
 }

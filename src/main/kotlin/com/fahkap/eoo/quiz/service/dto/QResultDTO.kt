@@ -22,11 +22,7 @@ data class QResultDTO(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is QResultDTO) return false
-        val qResultDTO = other
-        if (qResultDTO.id == null || id == null) {
-            return false
-        }
-        return id == qResultDTO.id
+        return id != null && other.id != null && id == other.id
     }
 
     override fun hashCode() = id.hashCode()

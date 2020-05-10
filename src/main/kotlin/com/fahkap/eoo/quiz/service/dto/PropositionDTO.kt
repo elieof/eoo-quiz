@@ -27,11 +27,7 @@ data class PropositionDTO(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is PropositionDTO) return false
-        val propositionDTO = other
-        if (propositionDTO.id == null || id == null) {
-            return false
-        }
-        return id == propositionDTO.id
+        return id != null && other.id != null && id == other.id
     }
 
     override fun hashCode() = id.hashCode()

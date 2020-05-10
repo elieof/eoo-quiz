@@ -53,7 +53,7 @@ if (OperatingSystem.current().isWindows()) {
 }
 
 //Reformat code before compilation
-compileKotlin.dependsOn ktlintFormat
+//compileKotlin.dependsOn ktlintFormat
 
 
 jacocoTestReport {

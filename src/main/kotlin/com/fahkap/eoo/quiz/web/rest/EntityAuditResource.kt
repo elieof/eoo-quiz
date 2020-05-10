@@ -35,7 +35,9 @@ class EntityAuditResource(
         @RequestParam("limit") limit: Int
     ): ResponseEntity<MutableList<EntityAuditEventDTO>> {
         val page = entityAuditEventService.findAllByEntityType(entityType, PageRequest.of(0, limit))
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers = PaginationUtil.generatePaginationHttpHeaders(
+            ServletUriComponentsBuilder.fromCurrentRequest(), page
+        )
         return ResponseEntity<MutableList<EntityAuditEventDTO>>(page.content, headers, HttpStatus.OK)
     }
 
@@ -46,7 +48,11 @@ class EntityAuditResource(
         @RequestParam(value = "entityId") entityId: String,
         @RequestParam(value = "commitVersion") commitVersion: Int
     ): ResponseEntity<EntityAuditEventDTO?>? {
-        val prev: EntityAuditEventDTO? = entityAuditEventService.findOneByEntityTypeAndEntityIdAndCommitVersion(qualifiedName, entityId, commitVersion)
+        val prev: EntityAuditEventDTO? = entityAuditEventService.findOneByEntityTypeAndEntityIdAndCommitVersion(
+            qualifiedName,
+            entityId,
+            commitVersion
+        )
         return ResponseEntity<EntityAuditEventDTO?>(prev, HttpStatus.OK)
     }
 }
