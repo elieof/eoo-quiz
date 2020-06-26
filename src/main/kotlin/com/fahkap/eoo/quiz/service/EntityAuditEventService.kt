@@ -6,11 +6,15 @@ import org.springframework.data.domain.Pageable
 
 interface EntityAuditEventService {
 
-    fun findAllByEntityTypeAndEntityId(entityType: String, entityId: Long): List<EntityAuditEventDTO>
+    fun findAllByEntityTypeAndEntityId(entityType: String, entityId: String): List<EntityAuditEventDTO>
 
     fun findAllByEntityType(entityType: String, pageRequest: Pageable): Page<EntityAuditEventDTO>
 
     fun findAllEntityTypes(): MutableList<String>
 
-    fun findOneByEntityTypeAndEntityIdAndCommitVersion(entityType: String, entityId: String, commitVersion: Int): EntityAuditEventDTO?
+    fun findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+        entityType: String,
+        entityId: String,
+        commitVersion: Int
+    ): EntityAuditEventDTO?
 }

@@ -16,7 +16,7 @@ class EntityAuditEventServiceImpl(
 ) : EntityAuditEventService {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun findAllByEntityTypeAndEntityId(entityType: String, entityId: Long): List<EntityAuditEventDTO> {
+    override fun findAllByEntityTypeAndEntityId(entityType: String, entityId: String): List<EntityAuditEventDTO> {
         log.debug("Request to get all Audit entities by type and id")
 
         return entityAuditEventRepository.findAllByEntityTypeAndEntityId(entityType, entityId)
@@ -36,10 +36,18 @@ class EntityAuditEventServiceImpl(
         return entityAuditEventRepository.findAllEntityTypes()
     }
 
-    override fun findOneByEntityTypeAndEntityIdAndCommitVersion(entityType: String, entityId: String, commitVersion: Int): EntityAuditEventDTO? {
+    override fun findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+        entityType: String,
+        entityId: String,
+        commitVersion: Int
+    ): EntityAuditEventDTO? {
 
         log.debug("Request to get Audit entity by type, id and commit version")
 
-        return entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(entityType, entityId, commitVersion)?.let { entityAuditEventMapper.toDto(it) }
+        return entityAuditEventRepository.findOneByEntityTypeAndEntityIdAndNextCommitVersion(
+            entityType,
+            entityId,
+            commitVersion
+        )?.let { entityAuditEventMapper.toDto(it) }
     }
 }

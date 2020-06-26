@@ -48,7 +48,7 @@ class EntityAuditResource(
         @RequestParam(value = "entityId") entityId: String,
         @RequestParam(value = "commitVersion") commitVersion: Int
     ): ResponseEntity<EntityAuditEventDTO?>? {
-        val prev: EntityAuditEventDTO? = entityAuditEventService.findOneByEntityTypeAndEntityIdAndCommitVersion(
+        val prev: EntityAuditEventDTO? = entityAuditEventService.findOneByEntityTypeAndEntityIdAndNextCommitVersion(
             qualifiedName,
             entityId,
             commitVersion
