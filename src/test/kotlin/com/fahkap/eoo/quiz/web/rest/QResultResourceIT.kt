@@ -13,10 +13,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -30,6 +32,8 @@ import kotlin.test.assertNotNull
  * @see QResultResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class QResultResourceIT {
 
     @Autowired
@@ -136,6 +140,7 @@ class QResultResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllQResults() {
         // Initialize the database
         qResultRepository.save(qResult)
@@ -150,6 +155,7 @@ class QResultResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getQResult() {
         // Initialize the database
         qResultRepository.save(qResult)
@@ -161,12 +167,13 @@ class QResultResourceIT {
         restQResultMockMvc.perform(get("/api/q-results/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(qResult.id))
             .andExpect(jsonPath("$.username").value(DEFAULT_USERNAME))
             .andExpect(jsonPath("$.valid").value(DEFAULT_VALID))
     }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingQResult() {
         // Get the qResult
         restQResultMockMvc.perform(get("/api/q-results/{id}", Long.MAX_VALUE))
@@ -222,18 +229,16 @@ class QResultResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteQResult() {
         // Initialize the database
         qResultRepository.save(qResult)
 
         val databaseSizeBeforeDelete = qResultRepository.findAll().size
 
-        val id = qResult.id
-        assertNotNull(id)
-
         // Delete the qResult
         restQResultMockMvc.perform(
-            delete("/api/q-results/{id}", id)
+            delete("/api/q-results/{id}", qResult.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

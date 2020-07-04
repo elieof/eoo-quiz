@@ -49,8 +49,8 @@ class TopicResource(
             )
         }
         val result = topicService.save(topicDTO)
-        return ResponseEntity.created(URI("/api/topics/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/topics/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -74,7 +74,7 @@ class TopicResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                    topicDTO.id.toString()
+                    topicDTO.id
                 )
             )
             .body(result)
@@ -88,12 +88,12 @@ class TopicResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of topics in body.
      */
     @GetMapping("/topics")
-    fun getAllTopics(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<TopicDTO>> {
+    fun getAllTopics(pageable: Pageable): ResponseEntity<List<TopicDTO>> {
         log.debug("REST request to get a page of Topics")
         val page = topicService.findAll(pageable)
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers = PaginationUtil.generatePaginationHttpHeaders(
+            ServletUriComponentsBuilder.fromCurrentRequest(), page
+        )
         return ResponseEntity.ok().headers(headers).body(page.content)
     }
 
@@ -119,6 +119,7 @@ class TopicResource(
     @DeleteMapping("/topics/{id}")
     fun deleteTopic(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete Topic : {}", id)
+
         topicService.delete(id)
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()

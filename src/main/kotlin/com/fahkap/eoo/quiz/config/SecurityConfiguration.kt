@@ -51,8 +51,4 @@ class SecurityConfiguration(private val oAuth2Properties: OAuth2Properties) : Re
     @Qualifier("loadBalancedRestTemplate")
     fun loadBalancedRestTemplate(customizer: RestTemplateCustomizer) =
         RestTemplate().apply { customizer.customize(this) }
-
-    @Bean
-    @Qualifier("vanillaRestTemplate")
-    fun vanillaRestTemplate(): RestTemplate = RestTemplate()
 }

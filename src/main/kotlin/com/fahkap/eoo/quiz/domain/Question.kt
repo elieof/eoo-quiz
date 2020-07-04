@@ -31,15 +31,15 @@ data class Question(
 
     @DBRef
     @Field("topic")
-    @JsonIgnoreProperties("questions")
+    @JsonIgnoreProperties(value = ["questions"], allowSetters = true)
     var topic: Topic? = null,
 
     @DBRef
     @Field("quiz")
-    @JsonIgnoreProperties("questions")
+    @JsonIgnoreProperties(value = ["questions"], allowSetters = true)
     var quiz: Quiz? = null
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - JHipster will add fields here
 ) : Serializable {
 
     fun addProposition(proposition: Proposition): Question {
@@ -53,7 +53,7 @@ data class Question(
         proposition.question = null
         return this
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

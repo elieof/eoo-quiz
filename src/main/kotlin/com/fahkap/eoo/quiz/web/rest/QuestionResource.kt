@@ -49,8 +49,8 @@ class QuestionResource(
             )
         }
         val result = questionService.save(questionDTO)
-        return ResponseEntity.created(URI("/api/questions/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/questions/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -74,7 +74,7 @@ class QuestionResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                    questionDTO.id.toString()
+                    questionDTO.id
                 )
             )
             .body(result)
@@ -88,12 +88,11 @@ class QuestionResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of questions in body.
      */
     @GetMapping("/questions")
-    fun getAllQuestions(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<QuestionDTO>> {
+    fun getAllQuestions(pageable: Pageable): ResponseEntity<List<QuestionDTO>> {
         log.debug("REST request to get a page of Questions")
         val page = questionService.findAll(pageable)
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers =
+            PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
         return ResponseEntity.ok().headers(headers).body(page.content)
     }
 
@@ -119,6 +118,7 @@ class QuestionResource(
     @DeleteMapping("/questions/{id}")
     fun deleteQuestion(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete Question : {}", id)
+
         questionService.delete(id)
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()

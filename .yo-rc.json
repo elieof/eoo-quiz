@@ -26,7 +26,10 @@
     "jwtSecretKey": "Nzc5Zjk0NGQwMzViNjI0YTg1ZWViM2RiNjViZWUwZDdmN2Q0ZmY2MjMyODczMzJmZmEzMTE5NzY0ODhmMzBmMWRmZmVjNWY2NzhjZGVkNDQyMzI2MWU2NWFkYTE2MmYwMThkMTgyNGM1OWVjNDU1ODg0YzIyYTI2ZWM4MDc1MTY=",
     "embeddableLaunchScript": false,
     "creationTimestamp": 1586784114099,
-    "testFrameworks": ["gatling", "cucumber"],
+    "testFrameworks": [
+      "gatling",
+      "cucumber"
+    ],
     "jhiPrefix": "jhi",
     "entitySuffix": "",
     "dtoSuffix": "DTO",

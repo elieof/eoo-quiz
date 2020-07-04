@@ -49,8 +49,8 @@ class QResultResource(
             )
         }
         val result = qResultService.save(qResultDTO)
-        return ResponseEntity.created(URI("/api/q-results/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/q-results/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -74,7 +74,7 @@ class QResultResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                    qResultDTO.id.toString()
+                    qResultDTO.id
                 )
             )
             .body(result)
@@ -88,12 +88,11 @@ class QResultResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of qResults in body.
      */
     @GetMapping("/q-results")
-    fun getAllQResults(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<QResultDTO>> {
+    fun getAllQResults(pageable: Pageable): ResponseEntity<List<QResultDTO>> {
         log.debug("REST request to get a page of QResults")
         val page = qResultService.findAll(pageable)
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers =
+            PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
         return ResponseEntity.ok().headers(headers).body(page.content)
     }
 
@@ -119,6 +118,7 @@ class QResultResource(
     @DeleteMapping("/q-results/{id}")
     fun deleteQResult(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete QResult : {}", id)
+
         qResultService.delete(id)
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()

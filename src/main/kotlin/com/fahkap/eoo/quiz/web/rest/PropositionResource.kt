@@ -49,8 +49,8 @@ class PropositionResource(
             )
         }
         val result = propositionService.save(propositionDTO)
-        return ResponseEntity.created(URI("/api/propositions/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/propositions/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -74,7 +74,7 @@ class PropositionResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                    propositionDTO.id.toString()
+                    propositionDTO.id
                 )
             )
             .body(result)
@@ -88,12 +88,11 @@ class PropositionResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of propositions in body.
      */
     @GetMapping("/propositions")
-    fun getAllPropositions(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<PropositionDTO>> {
+    fun getAllPropositions(pageable: Pageable): ResponseEntity<List<PropositionDTO>> {
         log.debug("REST request to get a page of Propositions")
         val page = propositionService.findAll(pageable)
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers =
+            PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
         return ResponseEntity.ok().headers(headers).body(page.content)
     }
 
@@ -119,6 +118,7 @@ class PropositionResource(
     @DeleteMapping("/propositions/{id}")
     fun deleteProposition(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete Proposition : {}", id)
+
         propositionService.delete(id)
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()

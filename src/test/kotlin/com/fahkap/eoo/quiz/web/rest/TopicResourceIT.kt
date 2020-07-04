@@ -20,10 +20,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -37,6 +39,8 @@ import kotlin.test.assertNotNull
  * @see TopicResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class TopicResourceIT {
 
     @Autowired
@@ -168,6 +172,7 @@ class TopicResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllTopics() {
         // Initialize the database
         topicRepository.save(topic)
@@ -181,6 +186,7 @@ class TopicResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getTopic() {
         // Initialize the database
         topicRepository.save(topic)
@@ -192,11 +198,12 @@ class TopicResourceIT {
         restTopicMockMvc.perform(get("/api/topics/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(topic.id))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
     }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingTopic() {
         // Get the topic
         restTopicMockMvc.perform(get("/api/topics/{id}", Long.MAX_VALUE))
@@ -267,6 +274,7 @@ class TopicResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteTopic() {
         // Initialize the database
         val savedTopic = topicRepository.save(topic)
@@ -278,7 +286,7 @@ class TopicResourceIT {
 
         // Delete the topic
         restTopicMockMvc.perform(
-            delete("/api/topics/{id}", id)
+            delete("/api/topics/{id}", topic.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

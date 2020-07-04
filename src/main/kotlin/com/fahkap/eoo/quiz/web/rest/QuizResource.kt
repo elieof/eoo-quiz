@@ -49,8 +49,8 @@ class QuizResource(
             )
         }
         val result = quizService.save(quizDTO)
-        return ResponseEntity.created(URI("/api/quizzes/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/quizzes/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -74,7 +74,7 @@ class QuizResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                    quizDTO.id.toString()
+                    quizDTO.id
                 )
             )
             .body(result)
@@ -88,12 +88,12 @@ class QuizResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of quizzes in body.
      */
     @GetMapping("/quizzes")
-    fun getAllQuizzes(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<QuizDTO>> {
+    fun getAllQuizzes(pageable: Pageable): ResponseEntity<List<QuizDTO>> {
         log.debug("REST request to get a page of Quizzes")
         val page = quizService.findAll(pageable)
-        val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
+        val headers = PaginationUtil.generatePaginationHttpHeaders(
+            ServletUriComponentsBuilder.fromCurrentRequest(), page
+        )
         return ResponseEntity.ok().headers(headers).body(page.content)
     }
 
@@ -119,6 +119,7 @@ class QuizResource(
     @DeleteMapping("/quizzes/{id}")
     fun deleteQuiz(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete Quiz : {}", id)
+
         quizService.delete(id)
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()

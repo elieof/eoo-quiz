@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field
  * @see org.springframework.boot.actuate.audit.AuditEvent
  */
 @Document(collection = "jhi_persistent_audit_event")
-class PersistentAuditEvent(
+data class PersistentAuditEvent(
 
     @Id
     var id: String? = null,

@@ -27,6 +27,7 @@ class WebConfigurer(
         if (env.activeProfiles.isNotEmpty()) {
             log.info("Web application configuration, using profiles: {}", *env.activeProfiles as Array<*>)
         }
+
         log.info("Web application fully configured")
     }
 
