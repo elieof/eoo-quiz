@@ -26,7 +26,7 @@ data class Quiz(
     @Field("question")
     var questions: MutableSet<Question> = mutableSetOf()
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - JHipster will add fields here
 ) : Serializable {
 
     fun addQuestion(question: Question): Quiz {
@@ -40,7 +40,7 @@ data class Quiz(
         question.quiz = null
         return this
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

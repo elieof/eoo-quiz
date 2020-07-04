@@ -39,7 +39,9 @@ class EooQuizKafkaResourceIT {
     }
 
     private fun startTestcontainer() {
-        kafkaContainer = KafkaContainer("5.4.0")
+        // TODO: withNetwork will need to be removed soon
+        // See discussion at https://github.com/jhipster/generator-jhipster/issues/11544#issuecomment-609065206
+        kafkaContainer = KafkaContainer("5.5.0").withNetwork(null)
         kafkaContainer.start()
     }
 

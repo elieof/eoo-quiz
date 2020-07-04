@@ -4,7 +4,7 @@
       "packageName": "com.fahkap.eoo.quiz",
       "nativeLanguage": "en"
     },
-    "jhipsterVersion": "6.8.0",
+    "jhipsterVersion": "6.9.1",
     "applicationType": "microservice",
     "baseName": "eooQuiz",
     "packageName": "com.fahkap.eoo.quiz",
@@ -53,7 +53,7 @@
       },
       {
         "name": "generator-jhipster-kotlin",
-        "version": "1.6.0"
+        "version": "1.8.1"
       }
     ],
     "enableTranslation": true,
@@ -63,7 +63,7 @@
     "blueprints": [
       {
         "name": "generator-jhipster-kotlin",
-        "version": "1.6.0"
+        "version": "1.8.1"
       }
     ],
     "reactive": false,

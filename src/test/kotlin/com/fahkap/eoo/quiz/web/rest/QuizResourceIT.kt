@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,6 +37,8 @@ import org.springframework.validation.Validator
  * @see QuizResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class QuizResourceIT {
 
     @Autowired
@@ -66,12 +70,12 @@ class QuizResourceIT {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         val quizResource = QuizResource(quizService)
-        this.restQuizMockMvc = MockMvcBuilders.standaloneSetup(quizResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build()
+         this.restQuizMockMvc = MockMvcBuilders.standaloneSetup(quizResource)
+             .setCustomArgumentResolvers(pageableArgumentResolver)
+             .setControllerAdvice(exceptionTranslator)
+             .setConversionService(createFormattingConversionService())
+             .setMessageConverters(jacksonMessageConverter)
+             .setValidator(validator).build()
     }
 
     @BeforeEach
@@ -141,6 +145,7 @@ class QuizResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllQuizzes() {
         // Initialize the database
         quizRepository.save(quiz)
@@ -151,10 +156,10 @@ class QuizResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(quiz.id)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
-    }
+            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION))) }
 
     @Test
+    @Throws(Exception::class)
     fun getQuiz() {
         // Initialize the database
         quizRepository.save(quiz)
@@ -166,12 +171,12 @@ class QuizResourceIT {
         restQuizMockMvc.perform(get("/api/quizzes/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(quiz.id))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
-            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
-    }
+            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION)) }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingQuiz() {
         // Get the quiz
         restQuizMockMvc.perform(get("/api/quizzes/{id}", Long.MAX_VALUE))
@@ -226,18 +231,16 @@ class QuizResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteQuiz() {
         // Initialize the database
         quizRepository.save(quiz)
 
         val databaseSizeBeforeDelete = quizRepository.findAll().size
 
-        val id = quiz.id
-        assertNotNull(id)
-
         // Delete the quiz
         restQuizMockMvc.perform(
-            delete("/api/quizzes/{id}", id)
+            delete("/api/quizzes/{id}", quiz.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

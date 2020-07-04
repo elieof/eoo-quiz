@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,6 +37,8 @@ import org.springframework.validation.Validator
  * @see QuestionResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class QuestionResourceIT {
 
     @Autowired
@@ -66,12 +70,12 @@ class QuestionResourceIT {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         val questionResource = QuestionResource(questionService)
-        this.restQuestionMockMvc = MockMvcBuilders.standaloneSetup(questionResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build()
+         this.restQuestionMockMvc = MockMvcBuilders.standaloneSetup(questionResource)
+             .setCustomArgumentResolvers(pageableArgumentResolver)
+             .setControllerAdvice(exceptionTranslator)
+             .setConversionService(createFormattingConversionService())
+             .setMessageConverters(jacksonMessageConverter)
+             .setValidator(validator).build()
     }
 
     @BeforeEach
@@ -160,6 +164,7 @@ class QuestionResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllQuestions() {
         // Initialize the database
         questionRepository.save(question)
@@ -170,10 +175,10 @@ class QuestionResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(question.id)))
             .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT)))
-            .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL)))
-    }
+            .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL))) }
 
     @Test
+    @Throws(Exception::class)
     fun getQuestion() {
         // Initialize the database
         questionRepository.save(question)
@@ -185,12 +190,12 @@ class QuestionResourceIT {
         restQuestionMockMvc.perform(get("/api/questions/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(question.id))
             .andExpect(jsonPath("$.statement").value(DEFAULT_STATEMENT))
-            .andExpect(jsonPath("$.level").value(DEFAULT_LEVEL))
-    }
+            .andExpect(jsonPath("$.level").value(DEFAULT_LEVEL)) }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingQuestion() {
         // Get the question
         restQuestionMockMvc.perform(get("/api/questions/{id}", Long.MAX_VALUE))
@@ -245,18 +250,16 @@ class QuestionResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteQuestion() {
         // Initialize the database
         questionRepository.save(question)
 
         val databaseSizeBeforeDelete = questionRepository.findAll().size
 
-        val id = question.id
-        assertNotNull(id)
-
         // Delete the question
         restQuestionMockMvc.perform(
-            delete("/api/questions/{id}", id)
+            delete("/api/questions/{id}", question.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

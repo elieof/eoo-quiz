@@ -4,16 +4,12 @@
     {
       "fieldName": "username",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "unique"
-      ]
+      "fieldValidateRules": ["unique"]
     },
     {
       "fieldName": "valid",
       "fieldType": "Boolean",
-      "fieldValidateRules": [
-        "required"
-      ]
+      "fieldValidateRules": ["required"]
     }
   ],
   "relationships": [

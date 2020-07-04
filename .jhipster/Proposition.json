@@ -4,18 +4,13 @@
     {
       "fieldName": "statement",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "required",
-        "minlength"
-      ],
+      "fieldValidateRules": ["required", "minlength"],
       "fieldValidateRulesMinlength": "2"
     },
     {
       "fieldName": "valid",
       "fieldType": "Boolean",
-      "fieldValidateRules": [
-        "required"
-      ]
+      "fieldValidateRules": ["required"]
     },
     {
       "fieldName": "explanation",

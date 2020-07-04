@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,6 +37,8 @@ import org.springframework.validation.Validator
  * @see PropositionResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class PropositionResourceIT {
 
     @Autowired
@@ -66,12 +70,12 @@ class PropositionResourceIT {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         val propositionResource = PropositionResource(propositionService)
-        this.restPropositionMockMvc = MockMvcBuilders.standaloneSetup(propositionResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build()
+         this.restPropositionMockMvc = MockMvcBuilders.standaloneSetup(propositionResource)
+             .setCustomArgumentResolvers(pageableArgumentResolver)
+             .setControllerAdvice(exceptionTranslator)
+             .setConversionService(createFormattingConversionService())
+             .setMessageConverters(jacksonMessageConverter)
+             .setValidator(validator).build()
     }
 
     @BeforeEach
@@ -161,6 +165,7 @@ class PropositionResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllPropositions() {
         // Initialize the database
         propositionRepository.save(proposition)
@@ -172,10 +177,10 @@ class PropositionResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(proposition.id)))
             .andExpect(jsonPath("$.[*].statement").value(hasItem(DEFAULT_STATEMENT)))
             .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID)))
-            .andExpect(jsonPath("$.[*].explanation").value(hasItem(DEFAULT_EXPLANATION)))
-    }
+            .andExpect(jsonPath("$.[*].explanation").value(hasItem(DEFAULT_EXPLANATION))) }
 
     @Test
+    @Throws(Exception::class)
     fun getProposition() {
         // Initialize the database
         propositionRepository.save(proposition)
@@ -187,13 +192,13 @@ class PropositionResourceIT {
         restPropositionMockMvc.perform(get("/api/propositions/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(proposition.id))
             .andExpect(jsonPath("$.statement").value(DEFAULT_STATEMENT))
             .andExpect(jsonPath("$.valid").value(DEFAULT_VALID))
-            .andExpect(jsonPath("$.explanation").value(DEFAULT_EXPLANATION))
-    }
+            .andExpect(jsonPath("$.explanation").value(DEFAULT_EXPLANATION)) }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingProposition() {
         // Get the proposition
         restPropositionMockMvc.perform(get("/api/propositions/{id}", Long.MAX_VALUE))
@@ -250,18 +255,16 @@ class PropositionResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteProposition() {
         // Initialize the database
         propositionRepository.save(proposition)
 
         val databaseSizeBeforeDelete = propositionRepository.findAll().size
 
-        val id = proposition.id
-        assertNotNull(id)
-
         // Delete the proposition
         restPropositionMockMvc.perform(
-            delete("/api/propositions/{id}", id)
+            delete("/api/propositions/{id}", proposition.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

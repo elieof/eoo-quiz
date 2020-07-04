@@ -4,12 +4,7 @@
     {
       "fieldName": "name",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "required",
-        "unique",
-        "minlength",
-        "maxlength"
-      ],
+      "fieldValidateRules": ["required", "unique", "minlength", "maxlength"],
       "fieldValidateRulesMinlength": "2",
       "fieldValidateRulesMaxlength": "50"
     }

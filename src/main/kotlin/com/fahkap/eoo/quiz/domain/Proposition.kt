@@ -29,12 +29,12 @@ data class Proposition(
 
     @DBRef
     @Field("question")
-    @JsonIgnoreProperties("propositions")
+    @JsonIgnoreProperties(value = ["propositions"], allowSetters = true)
     var question: Question? = null
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - JHipster will add fields here
 ) : Serializable {
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

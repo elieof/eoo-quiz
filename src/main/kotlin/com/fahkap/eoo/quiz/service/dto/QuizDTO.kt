@@ -22,12 +22,8 @@ data class QuizDTO(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is QuizDTO) return false
-        val quizDTO = other as QuizDTO
-        if (quizDTO.id == null || id == null) {
-            return false
-        }
-        return id == quizDTO.id
+        return id != null && id == other.id
     }
 
-    override fun hashCode() = id.hashCode()
+    override fun hashCode() = 31
 }

@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,6 +37,8 @@ import org.springframework.validation.Validator
  * @see QResultResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class QResultResourceIT {
 
     @Autowired
@@ -66,12 +70,12 @@ class QResultResourceIT {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         val qResultResource = QResultResource(qResultService)
-        this.restQResultMockMvc = MockMvcBuilders.standaloneSetup(qResultResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build()
+         this.restQResultMockMvc = MockMvcBuilders.standaloneSetup(qResultResource)
+             .setCustomArgumentResolvers(pageableArgumentResolver)
+             .setControllerAdvice(exceptionTranslator)
+             .setConversionService(createFormattingConversionService())
+             .setMessageConverters(jacksonMessageConverter)
+             .setValidator(validator).build()
     }
 
     @BeforeEach
@@ -141,6 +145,7 @@ class QResultResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllQResults() {
         // Initialize the database
         qResultRepository.save(qResult)
@@ -151,10 +156,10 @@ class QResultResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(qResult.id)))
             .andExpect(jsonPath("$.[*].username").value(hasItem(DEFAULT_USERNAME)))
-            .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID)))
-    }
+            .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID))) }
 
     @Test
+    @Throws(Exception::class)
     fun getQResult() {
         // Initialize the database
         qResultRepository.save(qResult)
@@ -166,12 +171,12 @@ class QResultResourceIT {
         restQResultMockMvc.perform(get("/api/q-results/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.id").value(qResult.id))
             .andExpect(jsonPath("$.username").value(DEFAULT_USERNAME))
-            .andExpect(jsonPath("$.valid").value(DEFAULT_VALID))
-    }
+            .andExpect(jsonPath("$.valid").value(DEFAULT_VALID)) }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingQResult() {
         // Get the qResult
         restQResultMockMvc.perform(get("/api/q-results/{id}", Long.MAX_VALUE))
@@ -226,18 +231,16 @@ class QResultResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteQResult() {
         // Initialize the database
         qResultRepository.save(qResult)
 
         val databaseSizeBeforeDelete = qResultRepository.findAll().size
 
-        val id = qResult.id
-        assertNotNull(id)
-
         // Delete the qResult
         restQResultMockMvc.perform(
-            delete("/api/q-results/{id}", id)
+            delete("/api/q-results/{id}", qResult.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,6 +37,8 @@ import org.springframework.validation.Validator
  * @see TopicResource
  */
 @SpringBootTest(classes = [SecurityBeanOverrideConfiguration::class, EooQuizApp::class])
+@AutoConfigureMockMvc
+@WithMockUser
 class TopicResourceIT {
 
     @Autowired
@@ -66,12 +70,12 @@ class TopicResourceIT {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         val topicResource = TopicResource(topicService)
-        this.restTopicMockMvc = MockMvcBuilders.standaloneSetup(topicResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build()
+         this.restTopicMockMvc = MockMvcBuilders.standaloneSetup(topicResource)
+             .setCustomArgumentResolvers(pageableArgumentResolver)
+             .setControllerAdvice(exceptionTranslator)
+             .setConversionService(createFormattingConversionService())
+             .setMessageConverters(jacksonMessageConverter)
+             .setValidator(validator).build()
     }
 
     @BeforeEach
@@ -140,6 +144,7 @@ class TopicResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllTopics() {
         // Initialize the database
         topicRepository.save(topic)
@@ -149,10 +154,10 @@ class TopicResourceIT {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(topic.id)))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
-    }
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME))) }
 
     @Test
+    @Throws(Exception::class)
     fun getTopic() {
         // Initialize the database
         topicRepository.save(topic)
@@ -164,11 +169,11 @@ class TopicResourceIT {
         restTopicMockMvc.perform(get("/api/topics/{id}", id))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(id))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
-    }
+            .andExpect(jsonPath("$.id").value(topic.id))
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME)) }
 
     @Test
+    @Throws(Exception::class)
     fun getNonExistingTopic() {
         // Get the topic
         restTopicMockMvc.perform(get("/api/topics/{id}", Long.MAX_VALUE))
@@ -221,18 +226,16 @@ class TopicResourceIT {
     }
 
     @Test
+    @Throws(Exception::class)
     fun deleteTopic() {
         // Initialize the database
         topicRepository.save(topic)
 
         val databaseSizeBeforeDelete = topicRepository.findAll().size
 
-        val id = topic.id
-        assertNotNull(id)
-
         // Delete the topic
         restTopicMockMvc.perform(
-            delete("/api/topics/{id}", id)
+            delete("/api/topics/{id}", topic.id)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent)
 

@@ -20,12 +20,8 @@ data class TopicDTO(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TopicDTO) return false
-        val topicDTO = other as TopicDTO
-        if (topicDTO.id == null || id == null) {
-            return false
-        }
-        return id == topicDTO.id
+        return id != null && id == other.id
     }
 
-    override fun hashCode() = id.hashCode()
+    override fun hashCode() = 31
 }

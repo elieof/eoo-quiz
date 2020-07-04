@@ -13,14 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 private const val ENTITY_NAME = "eooQuizTopic"
@@ -54,8 +47,8 @@ class TopicResource(
             )
         }
         val result = topicService.save(topicDTO)
-        return ResponseEntity.created(URI("/api/topics/" + result.id))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id.toString()))
+        return ResponseEntity.created(URI("/api/topics/${result.id}"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.id))
             .body(result)
     }
 
@@ -79,7 +72,7 @@ class TopicResource(
             .headers(
                 HeaderUtil.createEntityUpdateAlert(
                     applicationName, true, ENTITY_NAME,
-                     topicDTO.id.toString()
+                     topicDTO.id
                 )
             )
             .body(result)
@@ -92,9 +85,7 @@ class TopicResource(
      * @return the [ResponseEntity] with status `200 (OK)` and the list of topics in body.
      */
     @GetMapping("/topics")
-    fun getAllTopics(
-        pageable: Pageable
-    ): ResponseEntity<MutableList<TopicDTO>> {
+    fun getAllTopics(pageable: Pageable): ResponseEntity<List<TopicDTO>> {
         log.debug("REST request to get a page of Topics")
         val page = topicService.findAll(pageable)
         val headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)
@@ -122,8 +113,9 @@ class TopicResource(
     @DeleteMapping("/topics/{id}")
     fun deleteTopic(@PathVariable id: String): ResponseEntity<Void> {
         log.debug("REST request to delete Topic : {}", id)
+
         topicService.delete(id)
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id)).build()
     }
 }
